@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".RegistrationActivity">
 
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -13,11 +18,13 @@
         android:layout_centerVertical="true"
         android:orientation="vertical">
 
+
         <EditText
             android:layout_margin="15dp"
             android:id="@+id/editTextFName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="abcdefghijklmnopqrstuvwxyz."
             android:hint="Enter your First Name"/>
 
         <EditText
@@ -25,6 +32,7 @@
             android:id="@+id/editTextLName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="abcdefghijklmnopqrstuvwxyz."
             android:hint="Enter your Last Name"/>
 
         <TextView
@@ -47,6 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="phone"
+            android:digits="0123456789+"
             android:hint="Enter your Contact Number"/>
 
         <EditText
@@ -57,21 +66,11 @@
             android:inputType="phone"
             android:hint="Enter your Guardian's Contact Number"/>
 
-        <EditText
-            android:layout_margin="15dp"
-            android:id="@+id/editTextPinNumber"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/buttonFile"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="Enter your desired Pin Number"/>
-
-        <EditText
-            android:layout_margin="15dp"
-            android:id="@+id/editTextPinNumber2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="Enter your Pin Number Again"/>
+            android:text="Upload photo"/>
 
         <Button
             android:layout_margin="15dp"
@@ -80,4 +79,5 @@
             android:layout_height="wrap_content"
             android:text="Proceed"/>
     </LinearLayout>
+    </ScrollView>
 </android.support.constraint.ConstraintLayout>
