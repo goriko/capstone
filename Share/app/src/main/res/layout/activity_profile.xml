@@ -34,6 +34,20 @@
             android:layout_gravity="center_horizontal"
             android:text="Change Pin"/>
 
+        <Button
+            android:id="@+id/buttonInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="User Information"/>
+
+        <Button
+            android:id="@+id/buttonPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Update profile picture"/>
+
     <Button
         android:id="@+id/buttonLogout"
         android:layout_width="match_parent"

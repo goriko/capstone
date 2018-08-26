@@ -82,9 +82,9 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
         uploadFile(user);
 
-        UserInformation userInformation = new UserInformation(FName, LName, Gender, Number, GuardianNumber);
+        AddUserInformation addUserInformation = new AddUserInformation(FName, LName, Gender, Number, GuardianNumber);
 
-        databaseReference.child(user.getUid()).setValue(userInformation)
+        databaseReference.child(user.getUid()).setValue(addUserInformation)
             .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {

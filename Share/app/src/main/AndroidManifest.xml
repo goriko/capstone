@@ -22,7 +22,11 @@
         <activity android:name=".ProfileActivity" />
         <activity android:name=".RegistrationActivity" />
         <activity android:name=".ResetPasswordActivity" />
-        <activity android:name=".PinNumberActivity"></activity>
+        <activity android:name=".PinNumberActivity" />
+        <activity android:name=".ChangePinActivity" />
+        <activity android:name=".UserInfoActivity" />
+        <activity android:name=".EditUserInfoActivity" />
+        <activity android:name=".UpdatePicActivity"></activity>
     </application>
 
 </manifest>

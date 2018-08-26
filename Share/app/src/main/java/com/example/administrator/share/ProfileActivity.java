@@ -1,5 +1,7 @@
 package com.example.administrator.share;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -38,7 +41,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private TextView textViewVerified;
     private TextView textViewUserEmail;
     private Button buttonPin;
+    private Button buttonInfo;
     private Button buttonLogout;
+    private Button buttonPic;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
 
@@ -46,7 +51,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
 
         firebaseAuth = FirebaseAuth.getInstance();
         if(firebaseAuth.getCurrentUser() == null){
@@ -62,7 +66,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         textViewVerified = (TextView) findViewById(R.id.textVeiwVerified);
         textViewUserEmail = (TextView) findViewById(R.id.textViewUserEmail);
         buttonPin = (Button) findViewById(R.id.buttonPin);
+        buttonInfo = (Button) findViewById(R.id.buttonInfo);
         buttonLogout = (Button) findViewById(R.id.buttonLogout);
+        buttonPic = (Button) findViewById(R.id.buttonPic);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -90,7 +96,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         imageView.setImageBitmap(bm);
                     }
                 });
-
         if(user.isEmailVerified()){
             textViewVerified.setVisibility(View.INVISIBLE);
         }else{
@@ -109,6 +114,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         buttonPin.setOnClickListener(this);
+        buttonInfo.setOnClickListener(this);
+        buttonPic.setOnClickListener(this);
         buttonLogout.setOnClickListener(this);
     }
 
@@ -119,7 +126,11 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             finish();
             startActivity(new Intent(this, LoginActivity.class));
         }else if(v == buttonPin){
-            startActivity(new Intent(this, PinNumberActivity.class));
+            startActivity(new Intent(this, ChangePinActivity.class));
+        }else if(v == buttonInfo){
+            startActivity(new Intent(this, UserInfoActivity.class));
+        }else if(v == buttonPic){
+            startActivity(new Intent(this, UpdatePicActivity.class));
         }
    }
 }
