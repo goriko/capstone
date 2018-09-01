@@ -1,4 +1,4 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.administrator.share", appContext.getPackageName());
+        assertEquals("com.example.guanzon.share", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import org.junit.Test;
 

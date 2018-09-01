@@ -1,4 +1,4 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -84,13 +84,13 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
         AddUserInformation addUserInformation = new AddUserInformation(FName, LName, Gender, Number, GuardianNumber);
 
-        databaseReference.child(user.getUid()).setValue(addUserInformation)
-            .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    startActivity(new Intent(getApplicationContext(), PinNumberActivity.class));
-                }
-            });
+        databaseReference.child("users").child(user.getUid()).setValue(addUserInformation)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        startActivity(new Intent(getApplicationContext(), PinNumberActivity.class));
+                    }
+                });
 
         Toast.makeText(this, "Information Saved...", Toast.LENGTH_LONG).show();
 

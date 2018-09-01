@@ -1,19 +1,14 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.hardware.display.DisplayManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,8 +26,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import org.w3c.dom.Text;
-
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener{
 
     private FirebaseAuth firebaseAuth;
@@ -44,6 +37,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private Button buttonInfo;
     private Button buttonLogout;
     private Button buttonPic;
+    private Button buttonMap;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
 
@@ -59,7 +53,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         final FirebaseUser user = firebaseAuth.getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference(user.getUid().toString());
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
         storageReference = FirebaseStorage.getInstance().getReference("profile/"+user.getUid().toString()+".jpg");
 
         imageView = (ImageView) findViewById(R.id.imageView);
@@ -68,6 +62,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         buttonPin = (Button) findViewById(R.id.buttonPin);
         buttonInfo = (Button) findViewById(R.id.buttonInfo);
         buttonLogout = (Button) findViewById(R.id.buttonLogout);
+        buttonMap = (Button) findViewById(R.id.buttonMap);
         buttonPic = (Button) findViewById(R.id.buttonPic);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -117,6 +112,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         buttonInfo.setOnClickListener(this);
         buttonPic.setOnClickListener(this);
         buttonLogout.setOnClickListener(this);
+        buttonMap.setOnClickListener(this);
     }
 
     @Override
@@ -131,6 +127,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             startActivity(new Intent(this, UserInfoActivity.class));
         }else if(v == buttonPic){
             startActivity(new Intent(this, UpdatePicActivity.class));
+        }else if(v == buttonMap){
+            startActivity(new Intent(this, MapActivity.class));
         }
-   }
+    }
 }
+

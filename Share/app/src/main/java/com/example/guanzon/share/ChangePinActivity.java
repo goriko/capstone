@@ -1,4 +1,4 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -36,7 +36,7 @@ public class ChangePinActivity extends AppCompatActivity implements View.OnClick
 
         firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseUser user = firebaseAuth.getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference(user.getUid().toString());
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
 
         textView = (TextView) findViewById(R.id.textView);
         pinView = (Pinview) findViewById(R.id.pinView);

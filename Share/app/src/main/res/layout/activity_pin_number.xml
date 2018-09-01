@@ -24,23 +24,23 @@
             tools:layout_editor_absoluteY="0dp" />
 
         <com.goodiebag.pinview.Pinview
-        android:id="@+id/pinView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:pinWidth="40dp"
-        app:pinHeight="40dp"
-        app:pinLength="4"
-        app:cursorVisible="true"
-        app:forceKeyboard="true"
-        app:inputType="number"
-        app:password="true"/>
+            android:id="@+id/pinView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:pinWidth="40dp"
+            app:pinHeight="40dp"
+            app:pinLength="4"
+            app:cursorVisible="true"
+            app:forceKeyboard="true"
+            app:inputType="number"
+            app:password="true"/>
 
-    <Button
-        android:layout_margin="15dp"
-        android:id="@+id/buttonProceed"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Proceed"/>
+        <Button
+            android:layout_margin="15dp"
+            android:id="@+id/buttonProceed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Proceed"/>
 
     </LinearLayout>
 

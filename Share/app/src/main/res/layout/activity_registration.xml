@@ -11,73 +11,73 @@
         android:layout_width="fill_parent"
         android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:orientation="vertical">
-
-
-        <EditText
-            android:layout_margin="15dp"
-            android:id="@+id/editTextFName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:digits="abcdefghijklmnopqrstuvwxyz."
-            android:hint="Enter your First Name"/>
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
 
-        <EditText
-            android:layout_margin="15dp"
-            android:id="@+id/editTextLName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:digits="abcdefghijklmnopqrstuvwxyz."
-            android:hint="Enter your Last Name"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearance"
-            android:text="Gender"
-            android:id="@+id/textView"/>
+            <EditText
+                android:layout_margin="15dp"
+                android:id="@+id/editTextFName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="abcdefghijklmnopqrstuvwxyz."
+                android:hint="Enter your First Name"/>
 
-        <Spinner
-            android:id="@+id/spinnerGender"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/btn_dropdown"
-            android:spinnerMode="dropdown"/>
+            <EditText
+                android:layout_margin="15dp"
+                android:id="@+id/editTextLName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="abcdefghijklmnopqrstuvwxyz."
+                android:hint="Enter your Last Name"/>
 
-        <EditText
-            android:layout_margin="15dp"
-            android:id="@+id/editTextNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="phone"
-            android:digits="0123456789+"
-            android:hint="Enter your Contact Number"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearance"
+                android:text="Gender"
+                android:id="@+id/textView"/>
 
-        <EditText
-            android:layout_margin="15dp"
-            android:id="@+id/editTextGuardianNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="phone"
-            android:hint="Enter your Guardian's Contact Number"/>
+            <Spinner
+                android:id="@+id/spinnerGender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"/>
 
-        <Button
-            android:id="@+id/buttonFile"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:text="Upload photo"/>
+            <EditText
+                android:layout_margin="15dp"
+                android:id="@+id/editTextNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:digits="0123456789+"
+                android:hint="Enter your Contact Number"/>
 
-        <Button
-            android:layout_margin="15dp"
-            android:id="@+id/buttonProceed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Proceed"/>
-    </LinearLayout>
+            <EditText
+                android:layout_margin="15dp"
+                android:id="@+id/editTextGuardianNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:hint="Enter your Guardian's Contact Number"/>
+
+            <Button
+                android:id="@+id/buttonFile"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Upload photo"/>
+
+            <Button
+                android:layout_margin="15dp"
+                android:id="@+id/buttonProceed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Proceed"/>
+        </LinearLayout>
     </ScrollView>
 </android.support.constraint.ConstraintLayout>

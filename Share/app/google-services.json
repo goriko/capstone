@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:998773049331:android:f6caa924eb1008ee",
+        "mobilesdk_app_id": "1:998773049331:android:abecfc8e2ebf1b15",
         "android_client_info": {
-          "package_name": "com.example.administrator.share"
+          "package_name": "com.example.guanzon.share"
         }
       },
       "oauth_client": [

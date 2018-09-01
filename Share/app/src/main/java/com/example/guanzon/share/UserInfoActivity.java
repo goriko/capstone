@@ -1,4 +1,4 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,8 +15,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import org.w3c.dom.Text;
 
 public class UserInfoActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -34,7 +31,7 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
 
         firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseUser user = firebaseAuth.getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference(user.getUid().toString());
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
 
         textViewfname = (TextView) findViewById(R.id.textViewFName);
         textViewlname = (TextView) findViewById(R.id.textViewLName);

@@ -1,4 +1,4 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -34,7 +34,7 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
 
         firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseUser user = firebaseAuth.getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference(user.getUid().toString());
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
 
         editTextfname = (EditText) findViewById(R.id.editTextFName);
         editTextlname = (EditText) findViewById(R.id.editTextLName);
@@ -54,9 +54,9 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
                 editTextlname.setText(dataSnapshot.child("LName").getValue().toString());
                 editTextnumber.setText(dataSnapshot.child("Number").getValue().toString());
                 editTextgnumber.setText(dataSnapshot.child("GuardianNumber").getValue().toString());
-                if(dataSnapshot.child("Gender").getValue().toString().equals("Male")){
+                if (dataSnapshot.child("Gender").getValue().toString().equals("Male")) {
                     spinnerGender.setSelection(0);
-                }else{
+                } else {
                     spinnerGender.setSelection(1);
                 }
 
@@ -71,7 +71,7 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
 
     }
 
-    public void save(){
+    public void save() {
         databaseReference.child("FName").setValue(editTextfname.getText().toString());
         databaseReference.child("LName").setValue(editTextlname.getText().toString());
         databaseReference.child("Number").setValue(editTextnumber.getText().toString());
@@ -83,7 +83,7 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        if(v == buttonSave){
+        if (v == buttonSave) {
             save();
         }
     }

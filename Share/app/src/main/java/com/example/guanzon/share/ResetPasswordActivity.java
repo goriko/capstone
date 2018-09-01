@@ -1,9 +1,8 @@
-package com.example.administrator.share;
+package com.example.guanzon.share;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.widget.CircularProgressDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,7 +14,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class ResetPasswordActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -55,20 +53,20 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
         }
 
         firebaseAuth.sendPasswordResetEmail(email)
-            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
-                        Toast.makeText(ResetPasswordActivity.this, "Email has been sent to your email address", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                    }else{
-                        String message = task.getException().getMessage();
-                        Toast.makeText(ResetPasswordActivity.this, "Error Occurred: "+message, Toast.LENGTH_SHORT).show();
-                        editTextEmail.setText("");
-                        progressDialog.cancel();
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(ResetPasswordActivity.this, "Email has been sent to your email address", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                        }else{
+                            String message = task.getException().getMessage();
+                            Toast.makeText(ResetPasswordActivity.this, "Error Occurred: "+message, Toast.LENGTH_SHORT).show();
+                            editTextEmail.setText("");
+                            progressDialog.cancel();
+                        }
                     }
-                }
-            });
+                });
 
     }
 
@@ -79,3 +77,4 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
         }
     }
 }
+
