@@ -36,9 +36,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firebaseAuth = FirebaseAuth.getInstance();
 
         if(firebaseAuth.getCurrentUser() != null){
-            //profile activity
-            finish();
-            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            if(firebaseAuth.getCurrentUser().isEmailVerified()){
+                finish();
+                startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            }else{
+                finish();
+                startActivity(new Intent(getApplicationContext(), EmailVerificationActivity.class));
+            }
         }
 
         buttonRegister = (Button) findViewById(R.id.buttonRegister);
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             //user is successfully registered
                             Toast.makeText(MainActivity.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
                             finish();
-                            startActivity(new Intent(getApplicationContext(), RegistrationActivity.class));
+                            startActivity(new Intent(getApplicationContext(), EmailVerificationActivity.class));
                         }else{
                             String message = task.getException().getMessage();
                             Toast.makeText(MainActivity.this, "Error Occurred: "+message, Toast.LENGTH_SHORT).show();

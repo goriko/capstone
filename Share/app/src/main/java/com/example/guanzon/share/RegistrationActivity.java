@@ -21,6 +21,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import static java.lang.Boolean.FALSE;
+
 public class RegistrationActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final int PICK_IMAGE_REQUEST = 234;
@@ -74,6 +76,16 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         String Gender = spinnerGender.getSelectedItem().toString();
         String Num = editTextContactNumber.getText().toString().trim();
         String GuardianNum = editTextGContactNumber.getText().toString().trim();
+
+        if(android.util.Patterns.PHONE.matcher(Num).matches() == FALSE){
+            Toast.makeText(this, "Please Enter a correct phone number", Toast.LENGTH_LONG).show();
+            editTextContactNumber.setText("");
+            return;
+        }else if(android.util.Patterns.PHONE.matcher(GuardianNum).matches() == FALSE){
+            Toast.makeText(this, "Please Enter a correct phone number", Toast.LENGTH_LONG).show();
+            editTextGContactNumber.setText("");
+            return;
+        }
 
         Integer Number = Integer.valueOf(Num);
         Integer GuardianNumber = Integer.valueOf(GuardianNum);

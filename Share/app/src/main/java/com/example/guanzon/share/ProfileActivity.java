@@ -31,7 +31,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private FirebaseAuth firebaseAuth;
 
     private ImageView imageView;
-    private TextView textViewVerified;
     private TextView textViewUserEmail;
     private Button buttonPin;
     private Button buttonInfo;
@@ -57,7 +56,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         storageReference = FirebaseStorage.getInstance().getReference("profile/"+user.getUid().toString()+".jpg");
 
         imageView = (ImageView) findViewById(R.id.imageView);
-        textViewVerified = (TextView) findViewById(R.id.textVeiwVerified);
         textViewUserEmail = (TextView) findViewById(R.id.textViewUserEmail);
         buttonPin = (Button) findViewById(R.id.buttonPin);
         buttonInfo = (Button) findViewById(R.id.buttonInfo);
@@ -75,7 +73,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Toast.makeText(ProfileActivity.this, "Please finish registration", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(ProfileActivity.this, RegistrationActivity.class));
             }
         });
 
@@ -91,22 +90,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         imageView.setImageBitmap(bm);
                     }
                 });
-        if(user.isEmailVerified()){
-            textViewVerified.setVisibility(View.INVISIBLE);
-        }else{
-            textViewVerified.setText("Email Not Verified (Click to verify)");
-            textViewVerified.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Toast.makeText(ProfileActivity.this, "Verification Email Sent", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            });
-        }
 
         buttonPin.setOnClickListener(this);
         buttonInfo.setOnClickListener(this);

@@ -6,6 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".ProfileActivity">
 
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -62,13 +66,7 @@
             android:layout_gravity="center_horizontal"
             android:text="Create Travel"/>
 
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:id="@+id/textVeiwVerified"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Verified"/>
-
     </LinearLayout>
+    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>
