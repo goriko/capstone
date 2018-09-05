@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.guanzon.share">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,14 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_main">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,13 +19,13 @@
         <activity android:name=".ChangePinActivity" />
         <activity android:name=".EditUserInfoActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".MapActivity" />
         <activity android:name=".PinNumberActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".RegistrationActivity" />
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".UpdatePicActivity" />
-        <activity android:name=".UserInfoActivity"></activity>
+        <activity android:name=".UserInfoActivity" />
+        <activity android:name=".MapActivity"></activity>
     </application>
 
 </manifest>
