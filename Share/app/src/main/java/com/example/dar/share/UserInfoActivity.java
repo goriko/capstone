@@ -1,4 +1,4 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -72,3 +72,4 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
         startActivity(new Intent(this, ProfileActivity.class));
     }
 }
+

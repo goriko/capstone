@@ -1,4 +1,4 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -73,4 +73,3 @@ public class PinNumberActivity extends AppCompatActivity implements View.OnClick
         }
     }
 }
-

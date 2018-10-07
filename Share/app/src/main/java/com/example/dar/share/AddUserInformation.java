@@ -1,7 +1,6 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 public class AddUserInformation {
-
     public String FName;
     public String LName;
     public String Gender;
@@ -15,5 +14,4 @@ public class AddUserInformation {
         this.Number = Number;
         this.GuardianNumber = GuardianNumber;
     }
-
 }

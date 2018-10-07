@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:998773049331:android:abecfc8e2ebf1b15",
+        "mobilesdk_app_id": "1:998773049331:android:4d93fd6a753dfaa5",
         "android_client_info": {
-          "package_name": "com.example.guanzon.share"
+          "package_name": "com.example.dar.share"
         }
       },
       "oauth_client": [
@@ -21,7 +21,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDZL_DMRdJ07B_qKUCYnx6pDwmeZP7eOVA"
+          "current_key": "AIzaSyBx6cn5u2IGM0k1bn5Gk6DkYqyL74Q6xzA"
         }
       ],
       "services": {

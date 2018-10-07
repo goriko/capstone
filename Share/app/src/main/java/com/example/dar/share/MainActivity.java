@@ -1,4 +1,4 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -17,45 +17,46 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button buttonSiginIn;
+    private Button buttonRegister;
     private EditText editTextEmail;
     private EditText editTextPassword;
-    private TextView textViewSignup;
-    private TextView textViewPassword;
+    private TextView textViewSignin;
+
+    private ProgressDialog progressDialog;
 
     private FirebaseAuth firebaseAuth;
-    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_main);
 
         firebaseAuth = FirebaseAuth.getInstance();
 
         if(firebaseAuth.getCurrentUser() != null){
-            //profile activity
-            finish();
-            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            if(firebaseAuth.getCurrentUser().isEmailVerified()){
+                finish();
+                startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            }else{
+                finish();
+                startActivity(new Intent(getApplicationContext(), EmailVerificationActivity.class));
+            }
         }
 
+        buttonRegister = (Button) findViewById(R.id.buttonRegister);
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-        buttonSiginIn = (Button) findViewById(R.id.buttonSignIn);
-        textViewSignup = (TextView) findViewById(R.id.textViewSignUp);
-        textViewPassword = (TextView) findViewById(R.id.textViewPassword);
+        textViewSignin = (TextView) findViewById(R.id.textViewSignin);
 
         progressDialog = new ProgressDialog(this);
 
-        buttonSiginIn.setOnClickListener(this);
-        textViewSignup.setOnClickListener(this);
-        textViewPassword.setOnClickListener(this);
-
+        buttonRegister.setOnClickListener(this);
+        textViewSignin.setOnClickListener(this);
     }
 
-    private void userLogin(){
+    private void registerUser(){
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
@@ -69,42 +70,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
         //if validations are passed
-        progressDialog.setMessage("Logging in....");
+        progressDialog.setMessage("Registering user....");
         progressDialog.show();
 
-        firebaseAuth.signInWithEmailAndPassword(email, password)
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        progressDialog.dismiss();
                         if(task.isSuccessful()){
-                            // profile activity
+                            //user is successfully registered
+                            Toast.makeText(MainActivity.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
                             finish();
-                            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+                            startActivity(new Intent(getApplicationContext(), EmailVerificationActivity.class));
                         }else{
                             String message = task.getException().getMessage();
-                            Toast.makeText(LoginActivity.this, "Error Occurred: "+message, Toast.LENGTH_SHORT).show();
-                            editTextPassword.setText("");
+                            Toast.makeText(MainActivity.this, "Error Occurred: "+message, Toast.LENGTH_SHORT).show();
                             editTextEmail.setText("");
+                            editTextPassword.setText("");
+                            progressDialog.cancel();
                         }
                     }
                 });
     }
 
     @Override
-    public void onClick(View v) {
-        if(v == buttonSiginIn){
-            userLogin();
+    public void onClick(View view){
+        if(view == buttonRegister){
+            registerUser();
         }
 
-        if(v == textViewSignup){
-            finish();
-            startActivity(new Intent(this, MainActivity.class));
-        }
-
-        if(v == textViewPassword){
-            finish();
-            startActivity(new Intent(this, ResetPasswordActivity.class));
+        if(view == textViewSignin){
+            //return to login page
+            startActivity(new Intent(new Intent(this, LoginActivity.class)));
         }
     }
 }

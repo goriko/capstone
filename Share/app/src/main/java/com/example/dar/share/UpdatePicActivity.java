@@ -1,4 +1,4 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -68,3 +68,4 @@ public class UpdatePicActivity extends AppCompatActivity implements View.OnClick
         }
     }
 }
+

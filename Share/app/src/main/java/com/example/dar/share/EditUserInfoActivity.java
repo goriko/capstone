@@ -1,4 +1,4 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -18,8 +17,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import static java.lang.Boolean.FALSE;
 
 public class EditUserInfoActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -75,8 +72,6 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void save() {
-
-
 
         databaseReference.child("FName").setValue(editTextfname.getText().toString());
         databaseReference.child("LName").setValue(editTextlname.getText().toString());

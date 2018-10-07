@@ -4,28 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".LoginActivity">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_gravity="center_horizontal"
+            android:textColor="#ffffff"
             android:text="User Login"
-            android:id="@+id/textView"
-            android:layout_gravity="center_horizontal"/>
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <EditText
             android:id="@+id/editTextEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
+            android:background="@drawable/edittext"
+            android:gravity="center_horizontal"
+            android:textColor="#ffffff"
             android:hint="Enter your email"
             android:inputType="textEmailAddress" />
 
@@ -33,7 +48,11 @@
             android:id="@+id/editTextPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
+            android:background="@drawable/edittext"
+            android:gravity="center_horizontal"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:textColor="#ffffff"
             android:hint="Enter your password"
             android:inputType="textPassword" />
 
@@ -41,7 +60,9 @@
             android:id="@+id/buttonSignIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/button"
             android:layout_margin="15dp"
+            android:textColor="#ffffff"
             android:text="Login" />
 
         <TextView
@@ -49,13 +70,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Dont have an account? Create one here"
+            android:textColor="#28E0E2"
             android:textAlignment="center" />
+
         <TextView
-            android:textAlignment="center"
-            android:text="Forgot Password? Click here"
             android:id="@+id/textViewPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Forgot Password? Click here"
+            android:textColor="#28E0E2"
+            android:textAlignment="center" />
 
     </LinearLayout>
 

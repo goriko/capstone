@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginRight="70dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:elevation="10dp"
+        android:background="@drawable/whiteborder">
+
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="15dp"
+            android:textColor="#000000"
+            android:id="@+id/editTextOrigin"
+            android:background="@null"
+            android:imeOptions="actionSearch"
+            android:hint="Enter starting address"/>
+
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginRight="70dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="70dp"
+        android:elevation="10dp"
+        android:background="@drawable/whiteborder">
+
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="15dp"
+            android:textColor="#000000"
+            android:id="@+id/editTextDestination"
+            android:background="@null"
+            android:imeOptions="actionSearch"
+            android:hint="Enter destination address"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginRight="70dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="130dp"
+        android:elevation="10dp"
+        android:background="@drawable/whiteborder">
+
+        <Button
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:text="Find"
+            android:id="@+id/buttonFind"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginRight="70dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="190dp"
+        android:elevation="10dp"
+        android:background="@drawable/whiteborder">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/textView"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginRight="70dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="250dp"
+        android:elevation="10dp"
+        android:background="@drawable/whiteborder">
+
+        <Button
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:text="Create"
+            android:visibility="invisible"
+            android:id="@+id/buttonCreate"/>
+
+    </RelativeLayout>
+
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MapsActivity" />
+
+</RelativeLayout>

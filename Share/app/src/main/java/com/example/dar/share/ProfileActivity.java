@@ -1,4 +1,4 @@
-package com.example.guanzon.share;
+package com.example.dar.share;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,9 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,6 +35,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private Button buttonLogout;
     private Button buttonPic;
     private Button buttonMap;
+    private Button buttonJoin;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
 
@@ -55,28 +54,34 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
         storageReference = FirebaseStorage.getInstance().getReference("profile/"+user.getUid().toString()+".jpg");
 
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    Toast.makeText(ProfileActivity.this, "Please finish registration", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(ProfileActivity.this, RegistrationActivity.class));
+                }else{
+                    String Fname = dataSnapshot.child("FName").getValue().toString();
+                    String Lname = dataSnapshot.child("LName").getValue().toString();
+                    textViewUserEmail.setText("Welcome "+Fname+" "+Lname);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         imageView = (ImageView) findViewById(R.id.imageView);
         textViewUserEmail = (TextView) findViewById(R.id.textViewUserEmail);
         buttonPin = (Button) findViewById(R.id.buttonPin);
         buttonInfo = (Button) findViewById(R.id.buttonInfo);
         buttonLogout = (Button) findViewById(R.id.buttonLogout);
         buttonMap = (Button) findViewById(R.id.buttonMap);
+        buttonJoin = (Button) findViewById(R.id.buttonJoin);
         buttonPic = (Button) findViewById(R.id.buttonPic);
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String Fname = dataSnapshot.child("FName").getValue().toString();
-                String Lname = dataSnapshot.child("LName").getValue().toString();
-                textViewUserEmail.setText("Welcome "+Fname+" "+Lname);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(ProfileActivity.this, "Please finish registration", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(ProfileActivity.this, RegistrationActivity.class));
-            }
-        });
 
         final long ONE_MEGABYTE = 1024 * 1024;
         storageReference.getBytes(ONE_MEGABYTE)
@@ -96,6 +101,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         buttonPic.setOnClickListener(this);
         buttonLogout.setOnClickListener(this);
         buttonMap.setOnClickListener(this);
+        buttonJoin.setOnClickListener(this);
     }
 
     @Override
@@ -111,8 +117,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }else if(v == buttonPic){
             startActivity(new Intent(this, UpdatePicActivity.class));
         }else if(v == buttonMap){
-            startActivity(new Intent(this, MapActivity.class));
+            startActivity(new Intent(this, MapsActivity.class));
+        }else if(v == buttonJoin){
+            startActivity(new Intent(this, JoinRoomActivity.class));
         }
     }
 }
-
