@@ -1,6 +1,7 @@
 package com.example.dar.share;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,6 +30,7 @@ public class AddMember {
                 String NoOfUsers = dataSnapshot.getValue().toString();
                 Integer x = Integer.valueOf(NoOfUsers) + 1;
                 databaseReference.child("NoOfUsers").setValue(x.toString());
+                return;
             }
 
             @Override
@@ -43,12 +45,16 @@ public class AddMember {
                 if (i==0){
                     if (!dataSnapshot.hasChild("Member1")) {
                         databaseReference.child("users").child("Member1").setValue(user.getUid());
+                        Log.d("mem1", "mem");
                     } else if (!dataSnapshot.hasChild("Member2")) {
                         databaseReference.child("users").child("Member2").setValue(user.getUid());
+                        Log.d("mem2", "mem");
                     } else if (!dataSnapshot.hasChild("Member3")) {
                         databaseReference.child("users").child("Member3").setValue(user.getUid());
+                        Log.d("mem3", "mem");
                     }
                 }
+                i++;
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

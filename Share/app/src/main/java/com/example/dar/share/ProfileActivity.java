@@ -61,8 +61,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     Toast.makeText(ProfileActivity.this, "Please finish registration", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(ProfileActivity.this, RegistrationActivity.class));
                 }else{
-                    String Fname = dataSnapshot.child("FName").getValue().toString();
-                    String Lname = dataSnapshot.child("LName").getValue().toString();
+                    String Fname = dataSnapshot.child("Fname").getValue().toString();
+                    String Lname = dataSnapshot.child("Lname").getValue().toString();
                     textViewUserEmail.setText("Welcome "+Fname+" "+Lname);
                 }
             }

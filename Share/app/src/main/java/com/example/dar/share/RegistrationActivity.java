@@ -13,6 +13,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,12 +43,16 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
     private DatabaseReference databaseReference;
 
+    FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
         firebaseAuth = FirebaseAuth.getInstance();
+
+        user = firebaseAuth.getCurrentUser();
 
         storageReference = FirebaseStorage.getInstance().getReference();
 
@@ -79,36 +84,30 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
         if(android.util.Patterns.PHONE.matcher(Num).matches() == FALSE){
             Toast.makeText(this, "Please Enter a correct phone number", Toast.LENGTH_LONG).show();
-            editTextContactNumber.setText("");
+        editTextContactNumber.setText("");
             return;
         }else if(android.util.Patterns.PHONE.matcher(GuardianNum).matches() == FALSE){
-            Toast.makeText(this, "Please Enter a correct phone number", Toast.LENGTH_LONG).show();
+           Toast.makeText(this, "Please Enter a correct phone number", Toast.LENGTH_LONG).show();
             editTextGContactNumber.setText("");
             return;
         }
 
-        Integer Number = Integer.valueOf(Num);
-        Integer GuardianNumber = Integer.valueOf(GuardianNum);
+        uploadFile();
 
-        FirebaseUser user = firebaseAuth.getCurrentUser();
+        AddUserInformation addUserInformation = new AddUserInformation(FName, LName, Gender, Num, GuardianNum);
 
-        uploadFile(user);
-
-        AddUserInformation addUserInformation = new AddUserInformation(FName, LName, Gender, Number, GuardianNumber);
-
-        databaseReference.child("users").child(user.getUid()).setValue(addUserInformation)
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(new Intent(getApplicationContext(), PinNumberActivity.class));
-                    }
-                });
-
-        Toast.makeText(this, "Information Saved...", Toast.LENGTH_LONG).show();
-
+        databaseReference.child("users").child(user.getUid()).setValue(addUserInformation).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+                    Toast.makeText(RegistrationActivity.this, "Information Saved...", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(getApplicationContext(), PinNumberActivity.class));
+                }
+            }
+        });
     }
 
-    private void uploadFile(FirebaseUser user){
+    private void uploadFile(){
         StorageReference riversRef = storageReference.child("profile/"+user.getUid().toString()+".jpg");
         riversRef.putFile(filePath);
     }

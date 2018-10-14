@@ -1,6 +1,9 @@
 package com.example.dar.share;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +13,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,6 +41,8 @@ public class InsideRoomActivity extends AppCompatActivity {
     private Button buttonSend;
     private LinearLayout messages;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,56 +62,48 @@ public class InsideRoomActivity extends AppCompatActivity {
         id = user.getUid();
         databaseReference = FirebaseDatabase.getInstance().getReference("travel").child(getIntent().getExtras().get("id").toString());
 
-        databaseReference.child("NoOfUsers").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String NoOfUsers = dataSnapshot.getValue().toString();
-                x = Integer.valueOf(NoOfUsers) + 1;
-                databaseReference.child("NoOfUsers").setValue(x.toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
         databaseReference.child("users").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(i == 0){
-                    if(!dataSnapshot.hasChild("Member1")){
-                        databaseReference.child("users").child("Member1").setValue(user.getUid());
-                    }else if(!dataSnapshot.hasChild("Member2")){
-                        databaseReference.child("users").child("Member2").setValue(user.getUid());
-                    }else if(!dataSnapshot.hasChild("Member3")){
-                        databaseReference.child("users").child("Member3").setValue(user.getUid());
-                    }
-                    i++;
-                }else{
-                    linearLayout.removeAllViews();
-                    for(DataSnapshot data: dataSnapshot.getChildren()){
-                        String str = data.getValue().toString();
-                        ref = FirebaseDatabase.getInstance().getReference("users").child(str);
-                        ref.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                String Fname = dataSnapshot.child("FName").getValue().toString();
-                                String Lname = dataSnapshot.child("LName").getValue().toString();
-                                TextView textView1 = new TextView(InsideRoomActivity.this);
-                                textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                        LinearLayout.LayoutParams.WRAP_CONTENT));
-                                textView1.setText(Fname + " " + Lname);
-                                linearLayout.addView(textView1);
-                            }
+                    if(!dataSnapshot.exists()){
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(InsideRoomActivity.this);
+                        builder1.setMessage("Leader has left the room. Redirecting to rooms");
+                        builder1.setCancelable(true);
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                        builder1.setPositiveButton(
+                                "Ok",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        startActivity(new Intent(InsideRoomActivity.this, JoinRoomActivity.class));
+                                    }
+                                });
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
 
-                            }
-                        });
+                    }else{
+                        linearLayout.removeAllViews();
+                        for(DataSnapshot data: dataSnapshot.getChildren()){
+                            String str = data.getValue().toString();
+                            ref = FirebaseDatabase.getInstance().getReference("users").child(str);
+                            ref.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    String Fname = dataSnapshot.child("Fname").getValue().toString();
+                                    String Lname = dataSnapshot.child("Lname").getValue().toString();
+                                    TextView textView1 = new TextView(InsideRoomActivity.this);
+                                    textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT));
+                                    textView1.setText(Fname + " " + Lname);
+                                    linearLayout.addView(textView1);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
                     }
-                }
             }
 
             @Override
@@ -165,8 +163,33 @@ public class InsideRoomActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
 
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(InsideRoomActivity.this);
+        builder1.setMessage("Write your message here.");
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        delete();
+                    }
+                });
+
+        builder1.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+
+    }
+
+    public void delete(){
         databaseReference.child("NoOfUsers").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -174,13 +197,11 @@ public class InsideRoomActivity extends AppCompatActivity {
                 x = Integer.valueOf(NoOfUsers) - 1;
                 databaseReference.child("NoOfUsers").setValue(x.toString());
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
-
         databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -199,7 +220,7 @@ public class InsideRoomActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Toast.makeText(InsideRoomActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

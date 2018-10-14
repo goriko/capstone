@@ -50,10 +50,10 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                editTextfname.setText(dataSnapshot.child("FName").getValue().toString());
-                editTextlname.setText(dataSnapshot.child("LName").getValue().toString());
-                editTextnumber.setText(dataSnapshot.child("Number").getValue().toString());
-                editTextgnumber.setText(dataSnapshot.child("GuardianNumber").getValue().toString());
+                editTextfname.setText(dataSnapshot.child("Fname").getValue().toString());
+                editTextlname.setText(dataSnapshot.child("Lname").getValue().toString());
+                editTextnumber.setText(dataSnapshot.child("ContactNumber").getValue().toString());
+                editTextgnumber.setText(dataSnapshot.child("EmergencyContact").getValue().toString());
                 if (dataSnapshot.child("Gender").getValue().toString().equals("Male")) {
                     spinnerGender.setSelection(0);
                 } else {
@@ -73,10 +73,10 @@ public class EditUserInfoActivity extends AppCompatActivity implements View.OnCl
 
     public void save() {
 
-        databaseReference.child("FName").setValue(editTextfname.getText().toString());
-        databaseReference.child("LName").setValue(editTextlname.getText().toString());
-        databaseReference.child("Number").setValue(editTextnumber.getText().toString());
-        databaseReference.child("GuardianNumber").setValue(editTextgnumber.getText().toString());
+        databaseReference.child("Fname").setValue(editTextfname.getText().toString());
+        databaseReference.child("Lname").setValue(editTextlname.getText().toString());
+        databaseReference.child("ContactNumber").setValue(editTextnumber.getText().toString());
+        databaseReference.child("EmergencyContact").setValue(editTextgnumber.getText().toString());
         databaseReference.child("Gender").setValue(spinnerGender.getSelectedItem().toString());
 
         startActivity(new Intent(this, UserInfoActivity.class));

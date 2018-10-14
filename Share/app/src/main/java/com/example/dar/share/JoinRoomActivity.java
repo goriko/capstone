@@ -45,8 +45,8 @@ public class JoinRoomActivity extends AppCompatActivity implements View.OnClickL
                         LinearLayout samp = new LinearLayout(JoinRoomActivity.this);
                         samp.setBackgroundResource(R.drawable.customborder);
                         samp.setId(x);
-                        String origin = data.child("Origin").getValue().toString();
-                        String destination = data.child("Destination").getValue().toString();
+                        String origin = data.child("OriginString").getValue().toString();
+                        String destination = data.child("DestinationString").getValue().toString();
                         String noofusers = data.child("NoOfUsers").getValue().toString();
 
                         TextView textView1 = new TextView(JoinRoomActivity.this);
@@ -74,6 +74,8 @@ public class JoinRoomActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View v) {
         Integer i = v.getId();
+        AddMember addMember = new AddMember();
+        addMember.add(str[i]);
         Intent intent = new Intent(this, InsideRoomActivity.class);
         intent.putExtra("id", str[i]);
         startActivity(intent);

@@ -27,6 +27,7 @@ public class EmailVerificationActivity extends AppCompatActivity implements View
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        user.sendEmailVerification();
         textViewVerified = (TextView) findViewById(R.id.textVeiwVerified);
         buttonProceed = (Button) findViewById(R.id.buttonProceed);
         databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
@@ -48,8 +49,6 @@ public class EmailVerificationActivity extends AppCompatActivity implements View
         if(user.isEmailVerified()){
             textViewVerified.setText("Email has been verified");
             buttonProceed.setVisibility(View.VISIBLE);
-        }else{
-            user.sendEmailVerification();
         }
     }
 

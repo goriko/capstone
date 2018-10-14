@@ -43,11 +43,11 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                textViewfname.setText(dataSnapshot.child("FName").getValue().toString());
-                textViewlname.setText(dataSnapshot.child("LName").getValue().toString());
+                textViewfname.setText(dataSnapshot.child("Fname").getValue().toString());
+                textViewlname.setText(dataSnapshot.child("Lname").getValue().toString());
                 textViewgender.setText(dataSnapshot.child("Gender").getValue().toString());
-                textViewnumber.setText(dataSnapshot.child("Number").getValue().toString());
-                textViewgnumber.setText(dataSnapshot.child("GuardianNumber").getValue().toString());
+                textViewnumber.setText(dataSnapshot.child("ContactNumber").getValue().toString());
+                textViewgnumber.setText(dataSnapshot.child("EmergencyContact").getValue().toString());
             }
 
             @Override

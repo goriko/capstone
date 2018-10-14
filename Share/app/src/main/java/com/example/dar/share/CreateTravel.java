@@ -14,12 +14,20 @@ public class CreateTravel{
     public FirebaseUser user;
     public String mKey;
 
-    public String create(LatLng origin, LatLng destination, String originString, String destinationString, Integer fareFrom, Integer fareTo){
+    public String create(LatLng origin,
+                         LatLng destination,
+                         String originString,
+                         String destinationString,
+                         Integer fareFrom,
+                         Integer fareTo,
+                         Integer departureHour,
+                         Integer departureMinute,
+                         Integer estimatedTravelTime){
         databaseReference = FirebaseDatabase.getInstance().getReference();
         user = FirebaseAuth.getInstance().getCurrentUser();
         mKey = UUID.randomUUID().toString();
 
-        AddTravelInformation addTravelInformation = new AddTravelInformation(originString, destinationString, 1, 1, fareFrom, fareTo);
+        AddTravelInformation addTravelInformation = new AddTravelInformation(origin, destination, originString, destinationString, 1, 1, fareFrom, fareTo, departureHour, departureMinute, estimatedTravelTime);
         databaseReference.child("travel").child(mKey).setValue(addTravelInformation);
 
         AddLeaderID addLeaderID = new AddLeaderID(user.getUid().toString());

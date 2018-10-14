@@ -1,6 +1,8 @@
 package com.example.dar.share;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -19,6 +21,7 @@ import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,6 +29,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -44,7 +48,9 @@ import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import retrofit2.Call;
@@ -66,7 +72,7 @@ public class MapsActivity extends FragmentActivity implements
     private static final int Request_User_Location_Code = 99;
     private static final LatLngBounds latLngBounds = new LatLngBounds(new LatLng(-40, -168), new LatLng(71, 136));
     private AutoCompleteTextView textVieworigin, textViewdestination;
-    private Button buttonFind, buttonCreate;
+    private Button buttonFind, buttonCreate, buttonTime;
     private PlaceAutocompleteAdapter placeAutocompleteAdapter;
     private TextView textView;
 
@@ -76,6 +82,9 @@ public class MapsActivity extends FragmentActivity implements
     private String destinationString;
     private Integer fareFrom;
     private Integer fareTo;
+    private Integer estimatedTravelTime;
+    private Integer departureHour;
+    private Integer departureMinute;
 
 
     @Override
@@ -86,6 +95,7 @@ public class MapsActivity extends FragmentActivity implements
         textViewdestination = (AutoCompleteTextView) findViewById(R.id.editTextDestination);
         buttonFind = (Button) findViewById(R.id.buttonFind);
         buttonCreate = (Button) findViewById(R.id.buttonCreate);
+        buttonTime = (Button) findViewById(R.id.buttonTime);
         textView = (TextView) findViewById(R.id.textView);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -103,10 +113,20 @@ public class MapsActivity extends FragmentActivity implements
     private void init(){
         geoDataClient = Places.getGeoDataClient(this, null);
 
-        placeAutocompleteAdapter = new PlaceAutocompleteAdapter(this, geoDataClient, latLngBounds, null);
+        AutocompleteFilter filter =
+                new AutocompleteFilter.Builder().setCountry("PH").build();
+
+        placeAutocompleteAdapter = new PlaceAutocompleteAdapter(this, geoDataClient, latLngBounds, filter);
 
         textVieworigin.setAdapter(placeAutocompleteAdapter);
         textViewdestination.setAdapter(placeAutocompleteAdapter);
+
+        buttonTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTime();
+            }
+        });
 
         buttonFind.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +138,21 @@ public class MapsActivity extends FragmentActivity implements
 
     }
 
+    private void setTime(){
+        Calendar calendar = Calendar.getInstance();
+        int hours = calendar.get(Calendar.HOUR);
+        int minutes = calendar.get(Calendar.MINUTE);
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(MapsActivity.this, AlertDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                departureHour = hourOfDay;
+                departureMinute = minute;
+                //Toast.makeText(MapsActivity.this, hourOfDay + minute, Toast.LENGTH_SHORT).show();
+            }
+        }, hours, minutes, false);
+        timePickerDialog.show();
+    }
 
     private void geoLocate(){
         originString = textVieworigin.getText().toString();
@@ -148,7 +183,7 @@ public class MapsActivity extends FragmentActivity implements
         buttonCreate.setVisibility(View.VISIBLE);
         buttonCreate.setOnClickListener(v -> {
             CreateTravel createTravel = new CreateTravel();
-            String key = createTravel.create(origin, destination, originString, destinationString, fareFrom, fareFrom);
+            String key = createTravel.create(origin, destination, originString, destinationString, fareFrom, fareTo, departureHour, departureMinute, estimatedTravelTime);
             Intent intent = new Intent(MapsActivity.this, InsideRoomActivity.class);
             intent.putExtra("id", key);
             startActivity(intent);
@@ -184,11 +219,6 @@ public class MapsActivity extends FragmentActivity implements
                             Double distance = currentRoute.distance() / 1000;//in meters
                             Double duration = currentRoute.duration() / 60;//in seconds
 
-                            Double fare = (distance*13.50)+(duration*2)+40;
-                            fareFrom = Integer.valueOf(fare.intValue())-20;
-                            fareTo = Integer.valueOf(fare.intValue())+20;
-                            textView.setText("Estimated fare: PHP " + fareFrom.toString() + " - PHP " + fareTo.toString());
-
                             List<Point> points = PolylineUtils.decode(currentRoute.geometry(),6);
 
                             PolylineOptions options = new PolylineOptions()
@@ -196,6 +226,11 @@ public class MapsActivity extends FragmentActivity implements
                                     .geodesic(true);
                             if(x == 0){
                                 options.color(Color.BLUE);
+                                Double fare = (distance*13.50)+(duration*2)+40;
+                                fareFrom = Integer.valueOf(fare.intValue())-20;
+                                fareTo = Integer.valueOf(fare.intValue())+20;
+                                estimatedTravelTime = Integer.valueOf(duration.intValue());
+                                textView.setText("Estimated fare: PHP " + fareFrom.toString() + " - PHP " + fareTo.toString());
                             }else{
                                 options.color(Color.GRAY);
                             }
