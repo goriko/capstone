@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    tools:context=".MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/cabshareLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="82px"
+                android:layout_marginTop="30dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/carsharelogoaa" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="280px"
+                android:src= "@drawable/pinaa"
+                android:scaleType="fitCenter"
+                android:layout_below="@id/cabshareLogo"
+                android:id="@+id/Logo"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/Logo"
+                android:id="@+id/scrollView"
+                android:background="@drawable/blurred_square"
+                android:layout_marginTop="-30dp"
+
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+
+
+
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="left"
+                        android:layout_weight="1"
+                        android:text="This Pin Number Will be used for security purposes. Every after a travel, you must enter your pin number to tell us you arrived at your destination safely. If you are not able to input the correct pin number in the given time, a message will be sent to inform your guardian.\n"
+                        android:textColor="#ffffff"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:layout_marginTop="50dp"
+                        />
+
+                    <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="left"
+                        android:layout_weight="1"
+                        android:text="Enter your pin"
+                        android:textColor="#ffffff"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        />
+
+
+                    <com.goodiebag.pinview.Pinview
+                        android:id="@+id/pinView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:pinWidth="40dp"
+                        app:pinHeight="40dp"
+                        app:pinLength="4"
+                        app:cursorVisible="true"
+                        app:inputType="number"
+                        app:password="true"/>
+
+
+
+                    <Button
+                        android:id="@+id/buttonProceed"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:textColor="@color/white"
+                        android:text="Proceed"
+                        android:textStyle="normal"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:background="@drawable/register_button"
+                        android:layout_gravity="center"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="50dp"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</android.support.constraint.ConstraintLayout>
