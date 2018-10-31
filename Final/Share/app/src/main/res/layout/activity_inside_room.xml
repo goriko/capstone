@@ -29,9 +29,16 @@
 
             <Button
                 android:id="@+id/buttonPic"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Take Picture" />
+
+            <Button
+                android:id="@+id/buttonGuest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add Guest" />
 
         </LinearLayout>
 

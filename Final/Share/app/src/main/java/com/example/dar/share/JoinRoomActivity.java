@@ -38,7 +38,6 @@ public class JoinRoomActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 linearLayout.removeAllViews();
-                Integer i;
                 for(DataSnapshot data: dataSnapshot.getChildren()){{
                     if(data.child("Available").getValue().toString().equals("1")){
                         x++;
@@ -75,7 +74,7 @@ public class JoinRoomActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
         Integer i = v.getId();
         AddMember addMember = new AddMember();
-        addMember.add(str[i]);
+        addMember.add(str[i], null);
         Intent intent = new Intent(this, InsideRoomActivity.class);
         intent.putExtra("id", str[i]);
         startActivity(intent);

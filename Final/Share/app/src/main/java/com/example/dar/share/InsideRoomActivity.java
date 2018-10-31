@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -38,11 +40,12 @@ public class InsideRoomActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
     private DatabaseReference ref;
-    private Integer x, i = 0;
-    private String id;
+    private Integer x, i = 0, j=0;
+    private String id, roomid;
     private EmojiconEditText editTextMessage;
     private Button buttonSend;
     private Button buttonPic;
+    private Button buttonGuest;
     private LinearLayout messages;
     private AlarmManager alarmManager_time;
     private AlarmManager alarmManager_advance;
@@ -52,18 +55,30 @@ public class InsideRoomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inside_room);
 
+        roomid = getIntent().getExtras().get("id").toString();
+
         linearLayout = (LinearLayout) findViewById(R.id.layout);
         textViewID = (TextView) findViewById(R.id.textViewID);
         editTextMessage = (EmojiconEditText) findViewById(R.id.editTextMessage);
-        textViewID.setText(getIntent().getExtras().get("id").toString());
+        textViewID.setText(roomid);
         buttonSend = (Button) findViewById(R.id.buttonSend);
         buttonPic = (Button) findViewById(R.id.buttonPic);
+        buttonGuest = (Button) findViewById(R.id.buttonGuest);
         messages = (LinearLayout) findViewById(R.id.message);
 
         buttonPic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(InsideRoomActivity.this, TakePicActivity.class));
+                Intent intent = new Intent(InsideRoomActivity.this, TakePicActivity.class);
+                intent.putExtra("id", roomid);
+                startActivity(intent);
+            }
+        });
+
+        buttonGuest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                guest();
             }
         });
 
@@ -107,25 +122,48 @@ public class InsideRoomActivity extends AppCompatActivity {
                 } else {
                     linearLayout.removeAllViews();
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        String str = data.getValue().toString();
-                        ref = FirebaseDatabase.getInstance().getReference("users").child(str);
-                        ref.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                String Fname = dataSnapshot.child("Fname").getValue().toString();
-                                String Lname = dataSnapshot.child("Lname").getValue().toString();
-                                TextView textView1 = new TextView(InsideRoomActivity.this);
-                                textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                        LinearLayout.LayoutParams.WRAP_CONTENT));
-                                textView1.setText(Fname + " " + Lname);
-                                linearLayout.addView(textView1);
-                            }
+                        if(data.hasChild("UserID")){
+                            String str = data.child("UserID").getValue().toString();
+                            String name = data.child("Name").getValue().toString();
+                            ref = FirebaseDatabase.getInstance().getReference("users").child(str);
+                            ref.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    String Fname = dataSnapshot.child("Fname").getValue().toString();
+                                    String Lname = dataSnapshot.child("Lname").getValue().toString();
+                                    TextView textView1 = new TextView(InsideRoomActivity.this);
+                                    textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT));
+                                    textView1.setText("Guest: " + name + " (with: "+ Fname+" "+Lname+")");
+                                    linearLayout.addView(textView1);
+                                }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                            }
-                        });
+                                }
+                            });
+                        }else{
+                            String str = data.getValue().toString();
+                            ref = FirebaseDatabase.getInstance().getReference("users").child(str);
+                            ref.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    String Fname = dataSnapshot.child("Fname").getValue().toString();
+                                    String Lname = dataSnapshot.child("Lname").getValue().toString();
+                                    TextView textView1 = new TextView(InsideRoomActivity.this);
+                                    textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT));
+                                    textView1.setText(Fname + " " + Lname);
+                                    linearLayout.addView(textView1);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -215,30 +253,27 @@ public class InsideRoomActivity extends AppCompatActivity {
     }
 
     public void delete() {
-        databaseReference.child("NoOfUsers").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String NoOfUsers = dataSnapshot.getValue().toString();
-                x = Integer.valueOf(NoOfUsers) - 1;
-                databaseReference.child("NoOfUsers").setValue(x.toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
         databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    String value = data.getValue().toString();
-                    String key = data.getKey().toString();
-                    if (value.equals(id)) {
-                        if (key.equals("Leader")) {
-                            databaseReference.removeValue();
-                        } else {
+                    if(data.hasChild("UserID")){
+                        String value = data.child("UserID").getValue().toString();
+                        String key = data.getKey().toString();
+                        if(value.equals(id)){
                             databaseReference.child("users").child(key).removeValue();
+                            j++;
+                        }
+                    }else {
+                        String value = data.getValue().toString();
+                        String key = data.getKey().toString();
+                        if (value.equals(id)) {
+                            if (key.equals("Leader")) {
+                                databaseReference.removeValue();
+                            } else {
+                                databaseReference.child("users").child(key).removeValue();
+                                j++;
+                            }
                         }
                     }
                 }
@@ -247,6 +282,21 @@ public class InsideRoomActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(InsideRoomActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        databaseReference.child("NoOfUsers").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String NoOfUsers = dataSnapshot.getValue().toString();
+                x = Integer.valueOf(NoOfUsers) - j;
+                databaseReference.child("Available").setValue(1);
+                databaseReference.child("NoOfUsers").setValue(x.toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
 
@@ -307,5 +357,47 @@ public class InsideRoomActivity extends AppCompatActivity {
         intent_advance.putExtra("id", getIntent().getExtras().get("id").toString());
         PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(InsideRoomActivity.this, 24444, intent_advance, 0);
         alarmManager_advance.set(AlarmManager.RTC_WAKEUP, alarm_advance.getTimeInMillis(), pendingIntent_advance);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()){
+                    if(data.getValue().equals(id) && data.getKey().equals("Leader")){
+                        buttonPic.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void guest(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setMessage("Enter guest name");
+
+        EditText input = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AddMember guest = new AddMember();
+                guest.add(roomid, input.getText().toString());
+            }
+        });
+
+        alertDialog.show();
     }
 }

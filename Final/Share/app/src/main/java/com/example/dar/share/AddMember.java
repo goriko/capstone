@@ -17,7 +17,7 @@ public class AddMember {
     private FirebaseAuth firebaseAuth;
     private Integer i = 0;
 
-    public void add(String id){
+    public void add(String id, String name){
         firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseUser user = firebaseAuth.getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference("travel").child(id);
@@ -28,6 +28,11 @@ public class AddMember {
                 String NoOfUsers = dataSnapshot.getValue().toString();
                 Integer x = Integer.valueOf(NoOfUsers) + 1;
                 databaseReference.child("NoOfUsers").setValue(x.toString());
+
+                if(x == 4){
+                    databaseReference.child("Available").setValue(0);
+                }
+
                 return;
             }
 
@@ -41,15 +46,24 @@ public class AddMember {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (i==0){
-                    if (!dataSnapshot.hasChild("Member1")) {
-                        databaseReference.child("users").child("Member1").setValue(user.getUid());
-                        Log.d("mem1", "mem");
-                    } else if (!dataSnapshot.hasChild("Member2")) {
-                        databaseReference.child("users").child("Member2").setValue(user.getUid());
-                        Log.d("mem2", "mem");
-                    } else if (!dataSnapshot.hasChild("Member3")) {
-                        databaseReference.child("users").child("Member3").setValue(user.getUid());
-                        Log.d("mem3", "mem");
+
+                    if(name == null){
+                        if (!dataSnapshot.hasChild("Member1")) {
+                            databaseReference.child("users").child("Member1").setValue(user.getUid());
+                        } else if (!dataSnapshot.hasChild("Member2")) {
+                            databaseReference.child("users").child("Member2").setValue(user.getUid());
+                        } else if (!dataSnapshot.hasChild("Member3")) {
+                            databaseReference.child("users").child("Member3").setValue(user.getUid());
+                        }
+                    }else{
+                        Guest guest = new Guest(user.getUid(), name);
+                        if (!dataSnapshot.hasChild("Member1")) {
+                            databaseReference.child("users").child("Member1").setValue(guest);
+                        } else if (!dataSnapshot.hasChild("Member2")) {
+                            databaseReference.child("users").child("Member2").setValue(guest);
+                        } else if (!dataSnapshot.hasChild("Member3")) {
+                            databaseReference.child("users").child("Member3").setValue(guest);
+                        }
                     }
                 }
                 i++;

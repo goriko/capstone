@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SystemDesign</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_setting">Setting</string>
+    <string name="nav_room">Room</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

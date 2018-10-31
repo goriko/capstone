@@ -84,6 +84,9 @@ public class MapsActivity extends FragmentActivity implements
     private Integer estimatedTravelTime;
     private Integer departureHour;
     private Integer departureMinute;
+    private PolylineOptions route = new PolylineOptions()
+            .width(5)
+            .geodesic(true);
 
 
     @Override
@@ -218,28 +221,34 @@ public class MapsActivity extends FragmentActivity implements
                             Double distance = currentRoute.distance() / 1000;//in meters
                             Double duration = currentRoute.duration() / 60;//in seconds
 
+                            Double fare = (distance*13.50)+(duration*2)+40;
+                            fareFrom = Integer.valueOf(fare.intValue())-20;
+                            if(fareFrom <= 45){
+                                fareFrom = 45;
+                            }
+                            fareTo = Integer.valueOf(fare.intValue())+20;
+                            estimatedTravelTime = Integer.valueOf(duration.intValue());
+
                             List<Point> points = PolylineUtils.decode(currentRoute.geometry(),6);
 
                             PolylineOptions options = new PolylineOptions()
                                     .width(5)
                                     .geodesic(true);
                             if(x == 0){
-                                options.color(Color.BLUE);
-                                Double fare = (distance*13.50)+(duration*2)+40;
-                                fareFrom = Integer.valueOf(fare.intValue())-20;
-                                fareTo = Integer.valueOf(fare.intValue())+20;
-                                estimatedTravelTime = Integer.valueOf(duration.intValue());
+                                for(int i = 0; i<points.size(); i++){
+                                    route.add(new LatLng(points.get(i).latitude(), points.get(i).longitude()));
+                                }
+                                route.color(Color.BLUE);
                                 textView.setText("Estimated fare: PHP " + fareFrom.toString() + " - PHP " + fareTo.toString());
                             }else{
+                                for(int i = 0; i<points.size(); i++){
+                                    options.add(new LatLng(points.get(i).latitude(), points.get(i).longitude()));
+                                }
                                 options.color(Color.GRAY);
+                                mMap.addPolyline(options);
                             }
-
-                            for(int i = 0; i<points.size(); i++){
-                                options.add(new LatLng(points.get(i).latitude(), points.get(i).longitude()));
-                            }
-
-                            mMap.addPolyline(options);
                         }
+                        mMap.addPolyline(route);
                         Toast.makeText(MapsActivity.this, "routes found: " + count, Toast.LENGTH_SHORT).show();
                     }
 
@@ -358,6 +367,8 @@ public class MapsActivity extends FragmentActivity implements
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("user Current Location");
+
+        textView.setText("Lat: "+latLng.latitude+" Lng: "+latLng.longitude);
 
         currentUserLocationMarker = mMap.addMarker(markerOptions);
 

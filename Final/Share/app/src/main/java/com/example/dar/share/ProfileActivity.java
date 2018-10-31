@@ -38,6 +38,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private Button buttonPic;
     private Button buttonMap;
     private Button buttonJoin;
+    private Button buttonHistory;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
 
@@ -82,6 +83,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         buttonLogout = (Button) findViewById(R.id.buttonLogout);
         buttonMap = (Button) findViewById(R.id.buttonMap);
         buttonJoin = (Button) findViewById(R.id.buttonJoin);
+        buttonHistory = (Button) findViewById(R.id.buttonHistory);
         buttonPic = (Button) findViewById(R.id.buttonPic);
 
 
@@ -104,6 +106,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         buttonLogout.setOnClickListener(this);
         buttonMap.setOnClickListener(this);
         buttonJoin.setOnClickListener(this);
+        buttonHistory.setOnClickListener(this);
     }
 
     @Override
@@ -122,6 +125,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             startActivity(new Intent(this, MapsActivity.class));
         } else if (v == buttonJoin) {
             startActivity(new Intent(this, JoinRoomActivity.class));
+        }else if(v == buttonHistory){
+            startActivity(new Intent(this, HistoryActivity.class));
         }
     }
 
