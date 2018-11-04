@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -50,7 +51,10 @@ import org.w3c.dom.Text;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
+import static com.example.dar.systemdesign.NavBarActivity.Id;
+import static com.example.dar.systemdesign.NavBarActivity.Pic;
 import static com.example.dar.systemdesign.NavBarActivity.sContext;
 
 @SuppressLint("ValidFragment")
@@ -62,6 +66,7 @@ public class InsideRoomActivity extends Fragment{
     private EditText editTextMessage;
     private Button buttonSend;
     private Button buttonGuest;
+    private Button buttonTravel;
     private ImageView imageLeader;
     private LinearLayout linearLayoutUsers;
     private LinearLayout linearLayoutMessage;
@@ -71,9 +76,12 @@ public class InsideRoomActivity extends Fragment{
     private DatabaseReference ref;
     private FirebaseUser user;
     private StorageReference storageReference;
+    private Fragment fragment = null;
+    private int z = 0;
 
-    public InsideRoomActivity(String id){
+    public InsideRoomActivity(String id, String pic){
         ((NavBarActivity)this.getActivity()).Id = id;
+        ((NavBarActivity)this.getActivity()).Pic = pic;
     }
 
     @Override
@@ -89,6 +97,7 @@ public class InsideRoomActivity extends Fragment{
         editTextMessage = (EditText) rootView.findViewById(R.id.editTextMessage);
         buttonSend = (Button) rootView.findViewById(R.id.buttonSend);
         buttonGuest = (Button) rootView.findViewById(R.id.buttonGuest);
+        buttonTravel = (Button) rootView.findViewById(R.id.buttonTravel);
         imageLeader = (ImageView) rootView.findViewById(R.id.imageLeader);
         linearLayoutUsers = (LinearLayout) rootView.findViewById(R.id.linearLayoutUsers);
         linearLayoutMessage = (LinearLayout) rootView.findViewById(R.id.message);
@@ -102,10 +111,37 @@ public class InsideRoomActivity extends Fragment{
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
+        if(Pic != null){
+            if (Pic.equals("ok")){
+                buttonGuest.setVisibility(View.GONE);
+                databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Toast.makeText(sContext, dataSnapshot.child("Leader").getValue().toString(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }else if (Pic.equals("start")){
+                buttonGuest.setVisibility(View.GONE);
+            }
+        }
+
         buttonGuest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 guest();
+            }
+        });
+
+        buttonTravel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragment = new TakePicActivity(NavBarActivity.Id);
+                replaceFragment(fragment);
             }
         });
 
@@ -140,8 +176,230 @@ public class InsideRoomActivity extends Fragment{
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 linearLayoutUsers.removeAllViews();
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    if(data.hasChild("UserID")){
+                    if(data.getKey().equals("Leader")){
+                        final long ONE_MEGABYTE = 1024 * 1024 * 5;
+                        storageReference.child(data.getValue().toString()+".jpg").getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                float aspectRatio = bm.getWidth() / (float) bm.getHeight();
 
+                                int width = 90;
+                                int height = Math.round(width / aspectRatio);
+
+                                bm = Bitmap.createScaledBitmap(bm, width, height, false);
+
+                                imageLeader.setImageBitmap(bm);
+                                }
+                        });
+                        ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                textViewLeader.setText(dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString());
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) { }
+                        });
+                    }else{
+                        ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                LinearLayout linearLayout = new LinearLayout(sContext);
+                                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                linearLayout.setLayoutParams(layoutParams);
+                                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                linearLayout.setPadding(0, 0, 0, dp(10));
+
+                                ImageView imageView = new ImageView(sContext);
+                                LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(dp(36), dp(36));
+                                imageView.setLayoutParams(layoutParams2);
+                                imageView.setPadding(dp(10), 0, 0, 0);
+
+                                final long ONE_MEGABYTE = 1024 * 1024 * 5;
+                                storageReference.child(data.getValue().toString()+".jpg").getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        float aspectRatio = bm.getWidth() /(float) bm.getHeight();
+
+                                        int width = 90;
+                                        int height = Math.round(width / aspectRatio);
+
+                                        bm = Bitmap.createScaledBitmap(bm, width, height, false);
+
+                                        imageView.setImageBitmap(bm);
+                                    }
+                                });
+
+                                TextView textView = new TextView(sContext);
+                                LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                textView.setLayoutParams(layoutParams1);
+                                textView.setPadding(dp(10), dp(10), 0, 0);
+                                textView.setText(dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString());
+
+                                linearLayout.addView(imageView);
+                                linearLayout.addView(textView);
+                                linearLayoutUsers.addView(linearLayout);
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {}
+                            });
+                        }
+                    }
+                    databaseReference.child("Guests").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot data : dataSnapshot.getChildren()){
+                                LinearLayout linearLayout;
+                                linearLayout = new LinearLayout(sContext);
+                                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                linearLayout.setLayoutParams(layoutParams);
+                                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                linearLayout.setPadding(0, 0,0, dp(10));
+
+                                ImageView imageView = new ImageView(sContext);
+                                LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(dp(36), LinearLayout.LayoutParams.MATCH_PARENT);
+                                imageView.setLayoutParams(layoutParams1);
+                                imageView.setPadding(dp(10), 0, 0, 0);
+                                imageView.setImageDrawable(sContext.getResources().getDrawable(R.drawable.ic_user_icon));
+
+                                LinearLayout linearLayout1 = new LinearLayout(sContext);
+                                LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                                linearLayout1.setLayoutParams(layoutParams3);
+                                linearLayout1.setPadding(dp(10), 0, 0, 0);
+                                linearLayout1.setOrientation(LinearLayout.VERTICAL);
+
+                                TextView textView = new TextView(sContext);
+                                LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                textView.setLayoutParams(layoutParams2);
+                                textView.setText(data.child("Name").getValue().toString());
+
+                                TextView textView2 = new TextView(sContext);
+                                textView2.setLayoutParams(layoutParams2);
+
+                                ref.child(data.child("CompanionId").getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        textView2.setText("Guest (with: "+dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString()+")");
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                linearLayout1.addView(textView);
+                                linearLayout1.addView(textView2);
+
+                                linearLayout.addView(imageView);
+                                linearLayout.addView(linearLayout1);
+
+                                linearLayoutUsers.addView(linearLayout);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
+        databaseReference.child("Guests").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(z != 0){
+                    linearLayoutUsers.removeAllViews();
+                    databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot data : dataSnapshot.getChildren()) {
+                                if (data.getKey().equals("Leader")) {
+                                    final long ONE_MEGABYTE = 1024 * 1024 * 5;
+                                    storageReference.child(data.getValue().toString() + ".jpg").getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                        @Override
+                                        public void onSuccess(byte[] bytes) {
+                                            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                            float aspectRatio = bm.getWidth() / (float) bm.getHeight();
+
+                                            int width = 90;
+                                            int height = Math.round(width / aspectRatio);
+
+                                            bm = Bitmap.createScaledBitmap(bm, width, height, false);
+
+                                            imageLeader.setImageBitmap(bm);
+                                        }
+                                    });
+                                    ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            textViewLeader.setText(dataSnapshot.child("Fname").getValue().toString() + " " + dataSnapshot.child("Lname").getValue().toString());
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                        }
+                                    });
+                                } else {
+                                    ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            LinearLayout linearLayout = new LinearLayout(sContext);
+                                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                            linearLayout.setLayoutParams(layoutParams);
+                                            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                            linearLayout.setPadding(0, 0, 0, dp(10));
+
+                                            ImageView imageView = new ImageView(sContext);
+                                            LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(dp(36), dp(36));
+                                            imageView.setLayoutParams(layoutParams2);
+                                            imageView.setPadding(dp(10), 0, 0, 0);
+
+                                            final long ONE_MEGABYTE = 1024 * 1024 * 5;
+                                            storageReference.child(data.getValue().toString()+".jpg").getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                                @Override
+                                                public void onSuccess(byte[] bytes) {
+                                                    Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                                    float aspectRatio = bm.getWidth() /(float) bm.getHeight();
+
+                                                    int width = 90;
+                                                    int height = Math.round(width / aspectRatio);
+
+                                                    bm = Bitmap.createScaledBitmap(bm, width, height, false);
+
+                                                    imageView.setImageBitmap(bm);
+                                                }
+                                            });
+
+                                            TextView textView = new TextView(sContext);
+                                            LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                            textView.setLayoutParams(layoutParams1);
+                                            textView.setPadding(dp(10), dp(10), 0, 0);
+                                            textView.setText(dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString());
+
+                                            linearLayout.addView(imageView);
+                                            linearLayout.addView(textView);
+                                            linearLayoutUsers.addView(linearLayout);
+                                        }
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {}
+                                    });
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    for (DataSnapshot data : dataSnapshot.getChildren()){
                         LinearLayout linearLayout;
                         linearLayout = new LinearLayout(sContext);
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -169,7 +427,7 @@ public class InsideRoomActivity extends Fragment{
                         TextView textView2 = new TextView(sContext);
                         textView2.setLayoutParams(layoutParams2);
 
-                        ref.child(data.child("UserID").getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        ref.child(data.child("CompanionId").getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 textView2.setText("Guest (with: "+dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString()+")");
@@ -188,93 +446,9 @@ public class InsideRoomActivity extends Fragment{
                         linearLayout.addView(linearLayout1);
 
                         linearLayoutUsers.addView(linearLayout);
-
-
-                    }else{
-                        if(data.getKey().equals("Leader")){
-                            final long ONE_MEGABYTE = 1024 * 1024 * 5;
-                            storageReference.child(data.getValue().toString()+".jpg").getBytes(ONE_MEGABYTE)
-                                    .addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                        @Override
-                                        public void onSuccess(byte[] bytes) {
-                                            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                            float aspectRatio = bm.getWidth() /
-                                                    (float) bm.getHeight();
-
-                                            int width = 90;
-                                            int height = Math.round(width / aspectRatio);
-
-                                            bm = Bitmap.createScaledBitmap(
-                                                    bm, width, height, false);
-
-                                            imageLeader.setImageBitmap(bm);
-                                        }
-                                    });
-                            ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    textViewLeader.setText(dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString());
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }else{
-                            ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    LinearLayout linearLayout = new LinearLayout(sContext);
-                                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                    linearLayout.setLayoutParams(layoutParams);
-                                    linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-                                    linearLayout.setPadding(0, 0, 0, dp(10));
-
-                                    ImageView imageView = new ImageView(sContext);
-                                    LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(dp(36), dp(36));
-                                    imageView.setLayoutParams(layoutParams2);
-                                    imageView.setPadding(dp(10), 0, 0, 0);
-
-                                    final long ONE_MEGABYTE = 1024 * 1024 * 5;
-                                    storageReference.child(data.getValue().toString()+".jpg").getBytes(ONE_MEGABYTE)
-                                            .addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                                @Override
-                                                public void onSuccess(byte[] bytes) {
-                                                    Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                                    float aspectRatio = bm.getWidth() /
-                                                            (float) bm.getHeight();
-
-                                                    int width = 90;
-                                                    int height = Math.round(width / aspectRatio);
-
-                                                    bm = Bitmap.createScaledBitmap(
-                                                            bm, width, height, false);
-
-                                                    imageView.setImageBitmap(bm);
-                                                }
-                                            });
-
-                                    TextView textView = new TextView(sContext);
-                                    LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                    textView.setLayoutParams(layoutParams1);
-                                    textView.setPadding(dp(10), dp(10), 0, 0);
-                                    textView.setText(dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString());
-
-                                    linearLayout.addView(imageView);
-                                    linearLayout.addView(textView);
-                                    linearLayoutUsers.addView(linearLayout);
-
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
                     }
+                }else{
+                    z++;
                 }
             }
 
@@ -294,13 +468,21 @@ public class InsideRoomActivity extends Fragment{
 
                     String message = data.child("MessageText").getValue().toString();
                     String user = data.child("MessageUser").getValue().toString();
-                    long time = Long.parseLong(data.getKey().toString());
-                    String dateString = new SimpleDateFormat("dd-MM-yyyy (h:mm a)").format(new Date(time));
 
                     TextView textView1 = new TextView(sContext);
                     textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT));
-                    textView1.setText("User: " + user + "\nMessage: " + message + "\nTime: " + dateString);
+                    ref.child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            textView1.setText("User: " + dataSnapshot.child("Fname").getValue().toString() +" "+dataSnapshot.child("Lname").getValue().toString()+ "\nMessage: " + message);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
 
                     samp.addView(textView1);
                     linearLayoutMessage.addView(samp);
@@ -324,8 +506,9 @@ public class InsideRoomActivity extends Fragment{
             public void onClick(View v) {
                 String str = editTextMessage.getText().toString();
                 Message m = new Message(str, user.getUid().toString());
-                String date = String.valueOf(new Date().getTime());
-                databaseReference.child("messages").child(date).setValue(m);
+                String mKey;
+                mKey = UUID.randomUUID().toString();
+                databaseReference.child("messages").child(mKey).setValue(m);
                 editTextMessage.setText("");
                 InputMethodManager imm = (InputMethodManager) sContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -414,5 +597,11 @@ public class InsideRoomActivity extends Fragment{
         });
 
         alertDialog.show();
+    }
+    public void replaceFragment(Fragment someFragment) {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_frame, someFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

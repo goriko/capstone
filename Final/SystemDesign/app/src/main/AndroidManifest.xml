@@ -16,7 +16,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBx6cn5u2IGM0k1bn5Gk6DkYqyL74Q6xzA" />
@@ -37,6 +36,7 @@
 
         <receiver android:name=".NotificationTime" />
         <receiver android:name=".NotificationAdvance" />
+
     </application>
 
 </manifest>

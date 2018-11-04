@@ -18,6 +18,7 @@ public class SettingsActivity extends Fragment {
 
     private FirebaseAuth firebaseAuth;
     private Button buttonLogout;
+    private Button buttonHistory;
     private LinearLayout changePin;
     private LinearLayout changePass;
     private Fragment fragment = null;
@@ -31,6 +32,7 @@ public class SettingsActivity extends Fragment {
         firebaseAuth = FirebaseAuth.getInstance();
 
         buttonLogout = (Button) rootView.findViewById(R.id.buttonLogout);
+        buttonHistory = (Button) rootView.findViewById(R.id.buttonHistory);
         changePin = (LinearLayout) rootView.findViewById(R.id.cahngePin);
         changePass = (LinearLayout) rootView.findViewById(R.id.changePassword);
 
@@ -39,6 +41,14 @@ public class SettingsActivity extends Fragment {
             public void onClick(View v) {
                 firebaseAuth.signOut();
                 startActivity(new Intent(getActivity(), LoginActivity.class));
+            }
+        });
+
+        buttonHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragment = new HistoryActivity();
+                replaceFragment(fragment);
             }
         });
 

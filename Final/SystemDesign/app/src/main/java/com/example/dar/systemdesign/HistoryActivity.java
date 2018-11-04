@@ -2,19 +2,17 @@ package com.example.dar.systemdesign;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
-import android.drm.DrmStore;
-import android.graphics.Color;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
-import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -22,53 +20,63 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.GridLayout;
-import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import org.w3c.dom.Text;
 
 import static com.example.dar.systemdesign.NavBarActivity.sContext;
 
-public class RoomActivity extends Fragment implements View.OnClickListener {
+public class HistoryActivity extends Fragment implements View.OnClickListener {
 
-    private GridLayout gridView;
-    private Button buttonCreate;
-    private DatabaseReference databaseReference;
+    private ImageView imageViewUser;
+    private TextView textViewName;
     private LinearLayout linearLayout;
+
     private Integer x = 0;
     private String[] str = new String[100];
+
+    private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
+    private StorageReference storageReference;
+
     private Fragment fragment = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_room, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_history, container, false);
 
-        gridView = (GridLayout) rootView.findViewById(R.id.layout);
-        buttonCreate = (Button) rootView.findViewById(R.id.buttonCreate);
+        firebaseAuth = FirebaseAuth.getInstance();
+        final FirebaseUser user = firebaseAuth.getCurrentUser();
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(user.getUid().toString());
+        storageReference = FirebaseStorage.getInstance().getReference("profile/" + user.getUid().toString() + ".jpg");
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("travel");
+        imageViewUser = (ImageView) rootView.findViewById(R.id.imageViewUser);
+        textViewName = (TextView) rootView.findViewById(R.id.textViewName);
+        linearLayout = (LinearLayout) rootView.findViewById(R.id.layout);
+
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                gridView.removeAllViews();
-                for (DataSnapshot data: dataSnapshot.getChildren()){
-                    if(data.child("Available").getValue().toString().equals("1")){
-                        x++;
-                        layout(x,data);
-                    }
-                }
-
+                String Fname = dataSnapshot.child("Fname").getValue().toString();
+                String Lname = dataSnapshot.child("Lname").getValue().toString();
+                textViewName.setText(Fname + " " + Lname);
             }
 
             @Override
@@ -77,11 +85,45 @@ public class RoomActivity extends Fragment implements View.OnClickListener {
             }
         });
 
-        buttonCreate.setOnClickListener(new View.OnClickListener() {
+        final long ONE_MEGABYTE = 1024 * 1024 * 5;
+        storageReference.getBytes(ONE_MEGABYTE)
+                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        float aspectRatio = bm.getWidth() /
+                                (float) bm.getHeight();
+
+                        int width = 90;
+                        int height = Math.round(width / aspectRatio);
+
+                        bm = Bitmap.createScaledBitmap(
+                                bm, width, height, false);
+
+                        imageViewUser.setImageBitmap(bm);
+                    }
+                });
+
+        databaseReference = FirebaseDatabase.getInstance().getReference("travel");
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                fragment = new CreateRoomActivity();
-                replaceFragment(fragment);
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                linearLayout.removeAllViews();
+                for (DataSnapshot data: dataSnapshot.getChildren()){
+                    if(data.child("Available").getValue().toString().equals("2")){
+                        for(DataSnapshot ds : data.child("users").getChildren()){
+                            if(!ds.hasChild("UserID") && ds.getValue().toString().equals(user.getUid())){
+                                x++;
+                                layout(x,data);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
 
@@ -110,7 +152,7 @@ public class RoomActivity extends Fragment implements View.OnClickListener {
         LinearLayout.LayoutParams textParams1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         textParams1.gravity = Gravity.RIGHT;
         textView1.setLayoutParams(textParams1);
-        textView1.setText("Join Room");
+        textView1.setText("View Details");
         textView1.setTextColor(sContext.getResources().getColor(R.color.yellow));
         textView1.setTypeface(Typeface.DEFAULT_BOLD);
         textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) 15.5);
@@ -190,20 +232,6 @@ public class RoomActivity extends Fragment implements View.OnClickListener {
                 textView8.setText(time+":"+data.child("DepartureTime").child("DepartureMinute").getValue().toString()+" pm");
             }
         }
-        LinearLayout linearLayout7 = new LinearLayout(sContext);
-        LinearLayout.LayoutParams linParams7 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        linearLayout7.setLayoutParams(linParams7);
-
-        TextView textView9 = new TextView(sContext);
-        LinearLayout.LayoutParams textParams9 = new LinearLayout.LayoutParams(dp(120), LinearLayout.LayoutParams.WRAP_CONTENT);
-        textView9.setLayoutParams(textParams9);
-        textView9.setText("Population");
-
-        TextView textView10 = new TextView(sContext);
-        LinearLayout.LayoutParams textParams10 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, dp(30));
-        textView10.setLayoutParams(textParams10);
-        textView10.setPadding(dp(20), 0, dp(20), 0);
-        textView10.setText(data.child("NoOfUsers").getValue().toString()+"/4");
 
         LinearLayout linearLayout8 = new LinearLayout(sContext);
         LinearLayout.LayoutParams linParams8 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -234,9 +262,6 @@ public class RoomActivity extends Fragment implements View.OnClickListener {
         linearLayout6.addView(textView7);
         linearLayout6.addView(textView8);
 
-        linearLayout7.addView(textView9);
-        linearLayout7.addView(textView10);
-
         linearLayout8.addView(textView11);
 
         linearLayout2.addView(linearLayout3);
@@ -244,17 +269,15 @@ public class RoomActivity extends Fragment implements View.OnClickListener {
         linearLayout2.addView(linearLayout4);
         linearLayout2.addView(linearLayout5);
         linearLayout2.addView(linearLayout6);
-        linearLayout2.addView(linearLayout7);
         linearLayout2.addView(linearLayout8);
 
         cardView.addView(relativeLayout1);
         cardView.addView(linearLayout2);
-        gridView.addView(cardView);
+        linearLayout.addView(cardView);
 
         str[x] = data.getKey().toString();
-        textView1.setOnClickListener(RoomActivity.this);
+        textView1.setOnClickListener(HistoryActivity.this);
     }
-
     public int dp(int number){
         DisplayMetrics displayMetrics = sContext.getResources().getDisplayMetrics();
         return (int)((number * displayMetrics.density) + 0.5);
@@ -263,17 +286,14 @@ public class RoomActivity extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         Integer i = v.getId();
-        AddMember addMember = new AddMember();
-        addMember.add(str[i], null);
-        fragment = new InsideRoomActivity(str[i], "no");
+        fragment  = new InsideHistoryActivity(str[i]);
         replaceFragment(fragment);
     }
 
     public void replaceFragment(Fragment someFragment) {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.main_frame, someFragment, "InsideRoom");
-        transaction.addToBackStack("InsideRoom");
+        transaction.replace(R.id.main_frame, someFragment);
+        transaction.addToBackStack(null);
         transaction.commit();
     }
-
 }

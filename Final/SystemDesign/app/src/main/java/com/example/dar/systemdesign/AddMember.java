@@ -41,12 +41,11 @@ public class AddMember {
             }
         });
 
-        databaseReference.child("users").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (i==0){
-
-                    if(name == null){
+        if(name == null){
+            databaseReference.child("users").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (i==0){
                         if (!dataSnapshot.hasChild("Member1")) {
                             databaseReference.child("users").child("Member1").setValue(user.getUid());
                         } else if (!dataSnapshot.hasChild("Member2")) {
@@ -54,24 +53,35 @@ public class AddMember {
                         } else if (!dataSnapshot.hasChild("Member3")) {
                             databaseReference.child("users").child("Member3").setValue(user.getUid());
                         }
-                    }else{
+                    }
+                    i++;
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }else{
+            databaseReference.child("Guests").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(i == 0){
                         Guest guest = new Guest(user.getUid(), name);
-                        if (!dataSnapshot.hasChild("Member1")) {
-                            databaseReference.child("users").child("Member1").setValue(guest);
-                        } else if (!dataSnapshot.hasChild("Member2")) {
-                            databaseReference.child("users").child("Member2").setValue(guest);
-                        } else if (!dataSnapshot.hasChild("Member3")) {
-                            databaseReference.child("users").child("Member3").setValue(guest);
+                        if(!dataSnapshot.hasChild("Guest1")){
+                            databaseReference.child("Guests").child("Guest1").setValue(guest);
+                        }else{
+                            databaseReference.child("Guests").child("Guest2").setValue(guest);
                         }
                     }
                 }
-                i++;
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
 }

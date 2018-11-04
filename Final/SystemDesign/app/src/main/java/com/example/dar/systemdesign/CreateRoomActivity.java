@@ -136,7 +136,7 @@ public class CreateRoomActivity extends Fragment implements
         buttonCreate.setOnClickListener(v -> {
             CreateTravel createTravel = new CreateTravel();
             String key = createTravel.create(origin, destination, originString, destinationString, fareFrom, fareTo, departureHour, departureMinute, estimatedTravelTime);
-            fragment = new InsideRoomActivity(key);
+            fragment = new InsideRoomActivity(key, "no");
             replaceFragment(fragment);
         });
 
