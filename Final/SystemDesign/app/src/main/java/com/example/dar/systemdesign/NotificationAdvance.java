@@ -37,8 +37,8 @@ public class NotificationAdvance extends BroadcastReceiver {
 
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setSmallIcon(R.mipmap.ic_launcher);
-        mBuilder.setContentTitle("Time to go");
-        mBuilder.setContentText("Time to start your travel");
+        mBuilder.setContentTitle("Almost time to go");
+        mBuilder.setContentText("It is almost time to go. Please be on the meeting place in 5 minutes");
         mBuilder.setPriority(Notification.PRIORITY_MAX);
         mBuilder.setAutoCancel(true);
 

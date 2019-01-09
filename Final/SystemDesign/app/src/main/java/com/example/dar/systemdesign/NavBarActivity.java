@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import static com.example.dar.systemdesign.R.color.colorPrimary;
 
 public class NavBarActivity extends AppCompatActivity {
     private BottomNavigationView mMainNav;
@@ -52,6 +55,7 @@ public class NavBarActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         final FirebaseUser user = firebaseAuth.getCurrentUser();
         userid = user.getUid();
+
         if(getIntent().hasExtra("id")){
             room();
         }else{
@@ -66,23 +70,17 @@ public class NavBarActivity extends AppCompatActivity {
 
                 switch (item.getItemId()){
                     case R.id.nav_home:
-                        mMainNav.setItemBackgroundResource(R.color.colorPrimary);
+                        mMainNav.setItemBackgroundResource(colorPrimary);
                         transaction.replace(R.id.main_frame, new ProfileActivity()).commit();
                         return true;
-
 
                     case R.id.nav_room:
                         if(Id == null){
                             mMainNav.setItemBackgroundResource(R.color.colorAccent);
                             transaction.replace(R.id.main_frame, new RoomActivity()).addToBackStack(null).commit();
                         }else{
-                            if(Pic.equals("start")){
-                                fragment = new TravelActivity(Id);
-                                replaceFragment(fragment);
-                            }else{
-                                fragment = new InsideRoomActivity(Id, null);
-                                replaceFragment(fragment);
-                            }
+                            fragment = new InsideRoomActivity(Id, null);
+                            replaceFragment(fragment);
                         }
                         return true;
 
@@ -101,16 +99,15 @@ public class NavBarActivity extends AppCompatActivity {
         });
     }
 
-    public void load(){
-        FragmentManager fragmentManager= getSupportFragmentManager();
-        FragmentTransaction transaction= fragmentManager.beginTransaction();
-        mMainNav.setItemBackgroundResource(R.color.colorPrimary);
-        transaction.replace(R.id.main_frame, new ProfileActivity()).commit();
-    }
-
     public void room(){
         fragment = new InsideRoomActivity(getIntent().getExtras().get("id").toString(), getIntent().getExtras().get("pic").toString());
         replaceFragment(fragment);
+    }
+
+    public void load(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.main_frame, new ProfileActivity()).commit();
     }
 
     @Override
@@ -184,7 +181,6 @@ public class NavBarActivity extends AppCompatActivity {
                     alert11.show();
                 }
             }else{
-                Log.d("EYY", "dasdasdadadsdasdad");
                 getFragmentManager().popBackStackImmediate();
                 getSupportFragmentManager().popBackStack(getSupportFragmentManager().getBackStackEntryCount()-1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
@@ -193,8 +189,9 @@ public class NavBarActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        fragment = new InsideRoomActivity(intent.getExtras().get("id").toString(), intent.getExtras().get("pic").toString());
-        replaceFragment(fragment);
+        //fragment = new InsideRoomActivity(intent.getExtras().get("id").toString(), intent.getExtras().get("pic").toString());
+        Log.d("eyyy", intent.getExtras().get("id").toString());
+        //replaceFragment(fragment);
     }
     public void replaceFragment(Fragment someFragment) {
         FragmentManager fragmentManager= getSupportFragmentManager();
@@ -278,13 +275,15 @@ public class NavBarActivity extends AppCompatActivity {
 
             }
         });
-        Intent intent_time = new Intent(this, NotificationTime.class);
-        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(this, 24444, intent_time, 0);
+
+        Log.d("eyy", "cancel");
+        Intent intent_time = new Intent(getApplicationContext(), NotificationTime.class);
+        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(getApplicationContext(), 1, intent_time, 0);
         alarmManager_time.cancel(pendingIntent_time);
 
-        Intent intent_advance = new Intent(this, NotificationAdvance.class);
-        PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(this, 24444, intent_advance, 0);
-        alarmManager_advance.cancel(pendingIntent_advance);
+        //Intent intent_advance = new Intent(this, NotificationAdvance.class);
+        //PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(this, 24444, intent_advance, 0);
+        //alarmManager_advance.cancel(pendingIntent_advance);
         j=0;
     }
 }

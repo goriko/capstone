@@ -1,26 +1,17 @@
 package com.example.dar.systemdesign;
-
-import android.Manifest;
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,29 +22,34 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEnginePriority;
+import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.permissions.PermissionsListener;
+import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.PolylineOptions;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,179 +62,66 @@ import retrofit2.Response;
 
 import static com.example.dar.systemdesign.NavBarActivity.sContext;
 
-public class CreateRoomActivity extends Fragment implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        com.google.android.gms.location.LocationListener {
+public class CreateRoomActivity extends Fragment implements OnMapReadyCallback,
+        LocationEngineListener,
+        PermissionsListener {
 
-    private GoogleMap mMap;
-    private GoogleApiClient googleApiClient;
-    private GeoDataClient geoDataClient;
-    private LocationRequest locationRequest;
-    private Location lastLocation;
-    private Marker currentUserLocationMarker;
-    private static final int Request_User_Location_Code = 99;
-    private static final LatLngBounds latLngBounds = new LatLngBounds(new LatLng(-40, -168), new LatLng(71, 136));
-    private AutoCompleteTextView textVieworigin, textViewdestination;
-    private Button buttonFind, buttonCreate, buttonTime;
-    private PlaceAutocompleteAdapter placeAutocompleteAdapter;
+    private View rootView;
+
+    private MapView mapView;
+    private MapboxMap map;
+    private PermissionsManager permissionsManager;
+    private LocationEngine locationEngine;
+    private LocationLayerPlugin locationLayerPlugin;
+    private Location userLocation;
+
+    private Button buttonTime;
+    private Button buttonCreate;
+    private Button buttonFind;
+    private TextView textViewDeparture;
     private TextView textViewFare;
     private TextView textViewTravel;
-    private TextView textViewDeparture;
-    private View rootView;
-    private Fragment fragment = null;
-    private int i = 0;
+    private AutoCompleteTextView textVieworigin;
+    private AutoCompleteTextView textViewdestination;
 
-    private LatLng origin;
-    private LatLng destination;
+    private Integer departureHour;
+    private Integer departureMinute;
+    private int i = 0;
+    private GeoDataClient geoDataClient;
+    private PlaceAutocompleteAdapter placeAutocompleteAdapter;
+    private static final LatLngBounds latLngBounds = new LatLngBounds(new com.google.android.gms.maps.model.LatLng(-40, -168), new com.google.android.gms.maps.model.LatLng(71, 136));
     private String originString;
     private String destinationString;
+    private LatLng origin;
+    private LatLng destination;
+    private Marker markerOrigin = null;
+    private Marker markerDestination = null;
     private Integer fareFrom;
     private Integer fareTo;
     private Integer estimatedTravelTime;
-    private Integer departureHour;
-    private Integer departureMinute;
     private PolylineOptions route = new PolylineOptions()
-            .width(5)
-            .geodesic(true);
+            .width(5);
+    private Fragment fragment = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_create_room, container, false);
-        textVieworigin = (AutoCompleteTextView) rootView.findViewById(R.id.editTextOrigin);
-        textViewdestination = (AutoCompleteTextView) rootView.findViewById(R.id.editTextDestination);
-        buttonFind = (Button) rootView.findViewById(R.id.buttonFind);
-        buttonCreate = (Button) rootView.findViewById(R.id.buttonCreate);
+        Mapbox.getInstance(getActivity(), getString(R.string.access_token));
+        mapView = (MapView) rootView.findViewById(R.id.mapView);
+        mapView.getMapAsync(this::onMapReady);
+
         buttonTime = (Button) rootView.findViewById(R.id.buttonTime);
+        buttonCreate = (Button) rootView.findViewById(R.id.buttonCreate);
+        buttonFind = (Button) rootView.findViewById(R.id.buttonFind);
+        textViewDeparture = (TextView) rootView.findViewById(R.id.textViewDeparture);
         textViewFare = (TextView) rootView.findViewById(R.id.textViewFare);
         textViewTravel = (TextView) rootView.findViewById(R.id.textViewTravel);
-        textViewDeparture = (TextView) rootView.findViewById(R.id.textViewDeparture);
+        textVieworigin = (AutoCompleteTextView) rootView.findViewById(R.id.editTextOrigin);
+        textViewdestination = (AutoCompleteTextView) rootView.findViewById(R.id.editTextDestination);
 
-        SupportMapFragment mapFragment = (SupportMapFragment)  getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
 
-                if (ContextCompat.checkSelfPermission(sContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                {
-                    buildGoogleApiClient();
-
-                    mMap.setMyLocationEnabled(true);
-                }
-
-                init();
-            }
-        });
-
-        buttonCreate.setOnClickListener(v -> {
-            CreateTravel createTravel = new CreateTravel();
-            String key = createTravel.create(origin, destination, originString, destinationString, fareFrom, fareTo, departureHour, departureMinute, estimatedTravelTime);
-            fragment = new InsideRoomActivity(key, "no");
-            replaceFragment(fragment);
-        });
-
-        return rootView;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
-            checkUserLocationPermission();
-        }
-
-    }
-
-    private synchronized void buildGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(sContext)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        googleApiClient.connect();
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(1100);
-        locationRequest.setFastestInterval(1100);
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-        if (ContextCompat.checkSelfPermission(sContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
-            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-        }
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        lastLocation = location;
-
-        if (currentUserLocationMarker != null)
-        {
-            currentUserLocationMarker.remove();
-        }
-
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("user Current Location");
-
-        currentUserLocationMarker = mMap.addMarker(markerOptions);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomBy(16));
-
-        if (googleApiClient != null)
-        {
-            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode)
-        {
-            case Request_User_Location_Code:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    if (ContextCompat.checkSelfPermission(sContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                    {
-                        if (googleApiClient == null)
-                        {
-                            buildGoogleApiClient();
-                        }
-                        mMap.setMyLocationEnabled(true);
-                    }
-                }
-                else
-                {
-                    Toast.makeText(sContext, "Permission Denied...", Toast.LENGTH_SHORT).show();
-                }
-                return;
-        }
-    }
-
-    private void init() {
         geoDataClient = Places.getGeoDataClient(sContext, null);
 
         AutocompleteFilter filter =
@@ -263,32 +146,25 @@ public class CreateRoomActivity extends Fragment implements
                 HideSoftKeyboard();
             }
         });
+
+        buttonCreate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CreateTravel createTravel = new CreateTravel();
+                String key = createTravel.create(origin, destination, originString, destinationString, fareFrom, fareTo, departureHour, departureMinute, estimatedTravelTime);
+                fragment = new InsideRoomActivity(key, "no");
+                replaceFragment(fragment);
+            }
+        });
+
+        return rootView;
     }
 
-    private void setTime(){
-        Calendar calendar = Calendar.getInstance();
-        int hours = calendar.get(Calendar.HOUR);
-        int minutes = calendar.get(Calendar.MINUTE);
-
-        TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(), AlertDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                departureHour = hourOfDay;
-                departureMinute = minute;
-                if(departureHour > 12){
-                    textViewDeparture.setText(departureHour-12+":"+departureMinute+" pm");
-                }else{
-                    textViewDeparture.setText(departureHour+":"+departureMinute+" am");
-                }
-                if(i == 0){
-                    Toast.makeText(sContext, "Add Origin and Destination", Toast.LENGTH_SHORT).show();
-                    i = 1;
-                }else{
-                    buttonCreate.setVisibility(View.VISIBLE);
-                }
-            }
-        }, hours, minutes, false);
-        timePickerDialog.show();
+    public void replaceFragment(Fragment someFragment) {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_frame, someFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void geoLocate(){
@@ -314,7 +190,6 @@ public class CreateRoomActivity extends Fragment implements
         destination = new LatLng(destinationAddress.getLatitude(), destinationAddress.getLongitude());
 
         mark(originAddress, destinationAddress);
-
         getRoute(originAddress, destinationAddress);
 
         if(i == 0){
@@ -364,8 +239,8 @@ public class CreateRoomActivity extends Fragment implements
                             List<Point> points = PolylineUtils.decode(currentRoute.geometry(),6);
 
                             PolylineOptions options = new PolylineOptions()
-                                    .width(5)
-                                    .geodesic(true);
+                                    .width(5);
+
                             if(x == 0){
                                 for(int i = 0; i<points.size(); i++){
                                     route.add(new LatLng(points.get(i).latitude(), points.get(i).longitude()));
@@ -378,10 +253,10 @@ public class CreateRoomActivity extends Fragment implements
                                     options.add(new LatLng(points.get(i).latitude(), points.get(i).longitude()));
                                 }
                                 options.color(Color.GRAY);
-                                mMap.addPolyline(options);
+                                map.addPolyline(options);
                             }
                         }
-                        mMap.addPolyline(route);
+                        map.addPolyline(route);
                         Toast.makeText(sContext, "routes found: " + count, Toast.LENGTH_SHORT).show();
                     }
 
@@ -396,40 +271,116 @@ public class CreateRoomActivity extends Fragment implements
         LatLng latLngOrigin = new LatLng(origin.getLatitude(), origin.getLongitude());
         LatLng latLngDestination = new LatLng(destination.getLatitude(), destination.getLongitude());
 
-        MarkerOptions markerOrigin = new MarkerOptions()
-                .position(latLngOrigin)
-                .title("Origin Address");
+        if(markerOrigin != null || markerDestination != null){
+            map.removeMarker(markerOrigin);
+            map.removeMarker(markerDestination);
+        }
 
-        MarkerOptions markerDestination = new MarkerOptions()
-                .position(latLngDestination)
-                .title("Destination Address");
+        markerOrigin = map.addMarker(new MarkerOptions().position(latLngOrigin).title("Origin Address"));
+        markerDestination = map.addMarker(new MarkerOptions().position(latLngDestination).title("Destination Address"));
 
-        mMap.addMarker(markerOrigin);
-        mMap.addMarker(markerDestination);
     }
 
     private void HideSoftKeyboard(){
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
-    public boolean checkUserLocationPermission() {
-        if (ContextCompat.checkSelfPermission(sContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, Request_User_Location_Code);
-            } else {
-                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, Request_User_Location_Code);
+    private void setTime(){
+        Calendar calendar = Calendar.getInstance();
+        int hours = calendar.get(Calendar.HOUR);
+        int minutes = calendar.get(Calendar.MINUTE);
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(), AlertDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                departureHour = hourOfDay;
+                departureMinute = minute;
+                if(departureHour > 12){
+                    textViewDeparture.setText(departureHour-12+":"+departureMinute+" pm");
+                }else{
+                    textViewDeparture.setText(departureHour+":"+departureMinute+" am");
+                }
+                if(i == 0){
+                    Toast.makeText(sContext, "Add Origin and Destination", Toast.LENGTH_SHORT).show();
+                    i = 1;
+                }else{
+                    buttonCreate.setVisibility(View.VISIBLE);
+                }
             }
-            return false;
-        } else {
-            return true;
+        }, hours, minutes, false);
+        timePickerDialog.show();
+    }
+
+    @Override
+    public void onMapReady(MapboxMap mapboxMap) {
+        map = mapboxMap;
+        enableLocation();
+    }
+
+    private void enableLocation(){
+        if(PermissionsManager.areLocationPermissionsGranted(sContext)){
+            initializeLocationEngine();
+            initializeLocationLayer();
+        }else{
+            permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(getActivity());
         }
     }
 
-    public void replaceFragment(Fragment someFragment) {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.main_frame, someFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+    private void initializeLocationEngine(){
+        locationEngine = new LocationEngineProvider(sContext).obtainBestLocationEngineAvailable();
+        locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
+        locationEngine.activate();
+
+        @SuppressLint("MissingPermission") Location lastLocation = locationEngine.getLastLocation();
+        if(lastLocation !=null){
+            userLocation = lastLocation;
+            setCameraPosition(lastLocation);
+        }else{
+            locationEngine.addLocationEngineListener(this);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void initializeLocationLayer(){
+        locationLayerPlugin = new LocationLayerPlugin(mapView, map, locationEngine);
+        locationLayerPlugin.setLocationLayerEnabled(true);
+        locationLayerPlugin.setCameraMode(CameraMode.TRACKING);
+        locationLayerPlugin.setRenderMode(RenderMode.NORMAL);
+    }
+    private void setCameraPosition(Location location){
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13.0));
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onConnected() {
+        locationEngine.requestLocationUpdates();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if(location != null){
+            userLocation = location;
+            setCameraPosition(location);
+        }
+    }
+
+    @Override
+    public void onExplanationNeeded(List<String> permissionsToExplain) {
+
+    }
+
+    @Override
+    public void onPermissionResult(boolean granted) {
+        if (granted){
+            enableLocation();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.example.dar.systemdesign;
 
-import com.google.android.gms.maps.model.LatLng;
+
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
 public class AddTravelInformation {
 

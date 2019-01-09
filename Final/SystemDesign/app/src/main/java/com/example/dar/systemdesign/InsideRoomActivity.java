@@ -89,7 +89,8 @@ public class InsideRoomActivity extends Fragment{
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_inside_room, container, false);
 
-        Toast.makeText(sContext, ((NavBarActivity)this.getActivity()).Id, Toast.LENGTH_SHORT).show();
+        InputMethodManager imm = (InputMethodManager)sContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(rootView.getWindowToken(), 0);
 
         textViewLeader = (TextView) rootView.findViewById(R.id.textViewLeader);
         textViewTravelTime = (TextView) rootView.findViewById(R.id.textViewTravelTime);
@@ -114,19 +115,20 @@ public class InsideRoomActivity extends Fragment{
         if(Pic != null){
             if (Pic.equals("ok")){
                 buttonGuest.setVisibility(View.GONE);
-                databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Toast.makeText(sContext, dataSnapshot.child("Leader").getValue().toString(), Toast.LENGTH_SHORT).show();
-                    }
+                //databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                //    @Override
+                //    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //        Toast.makeText(sContext, dataSnapshot.child("Leader").getValue().toString(), Toast.LENGTH_SHORT).show();
+                //    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                //    @Override
+                //    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    }
-                });
+                //    }
+                //});
             }else if (Pic.equals("start")){
-                buttonGuest.setVisibility(View.GONE);
+                Toast.makeText(sContext, Pic, Toast.LENGTH_SHORT).show();
+                //buttonGuest.setVisibility(View.GONE);
             }
         }
 
@@ -536,12 +538,12 @@ public class InsideRoomActivity extends Fragment{
         alarm_time.set(Calendar.MINUTE, departureMinute);
         alarm_time.set(Calendar.SECOND, 0);
 
-        if (departureMinute >= 5) {
+        if (departureMinute >= 3) {
             alarm_advance.set(Calendar.HOUR_OF_DAY, departureHour);
-            alarm_advance.set(Calendar.MINUTE, departureMinute - 5);
+            alarm_advance.set(Calendar.MINUTE, departureMinute - 3);
             alarm_advance.set(Calendar.SECOND, 0);
         } else {
-            int i = 5 - departureMinute;
+            int i = 3 - departureMinute;
             alarm_advance.set(Calendar.HOUR_OF_DAY, departureHour - 1);
             alarm_advance.set(Calendar.MINUTE, 60 - i);
             alarm_advance.set(Calendar.SECOND, 0);
@@ -553,17 +555,17 @@ public class InsideRoomActivity extends Fragment{
 
         Intent intent_time = new Intent(sContext, NotificationTime.class);
         intent_time.putExtra("id", ((NavBarActivity)this.getActivity()).Id);
-        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(sContext, 24444, intent_time, 0);
+        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(sContext, 1, intent_time, 0);
         ((NavBarActivity)this.getActivity()).alarmManager_time.set(AlarmManager.RTC_WAKEUP, alarm_time.getTimeInMillis(), pendingIntent_time);
 
         if (alarm_advance.before(cal_now)) {
             alarm_advance.add(Calendar.DATE, 1);
         }
 
-        Intent intent_advance = new Intent(sContext, NotificationAdvance.class);
-        intent_advance.putExtra("id", ((NavBarActivity)this.getActivity()).Id);
-        PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(sContext, 24444, intent_advance, 0);
-        ((NavBarActivity)this.getActivity()).alarmManager_advance.set(AlarmManager.RTC_WAKEUP, alarm_advance.getTimeInMillis(), pendingIntent_advance);
+        //Intent intent_advance = new Intent(sContext, NotificationAdvance.class);
+        //intent_advance.putExtra("id", ((NavBarActivity)this.getActivity()).Id);
+        //PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(sContext, 24444, intent_advance, 0);
+        //((NavBarActivity)this.getActivity()).alarmManager_advance.set(AlarmManager.RTC_WAKEUP, alarm_advance.getTimeInMillis(), pendingIntent_advance);
     }
 
     public int dp(int number){
