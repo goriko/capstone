@@ -53,35 +53,32 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
-import static com.example.dar.systemdesign.NavBarActivity.Id;
-import static com.example.dar.systemdesign.NavBarActivity.Pic;
+import static com.example.dar.systemdesign.NavBarActivity.roomId;
+import static com.example.dar.systemdesign.NavBarActivity.roomStatus;
 import static com.example.dar.systemdesign.NavBarActivity.sContext;
 
 @SuppressLint("ValidFragment")
-public class InsideRoomActivity extends Fragment{
+public class InsideRoomActivity extends Fragment implements View.OnClickListener {
 
-    private TextView textViewLeader;
-    private TextView textViewTravelTime;
-    private TextView textViewFare;
-    private EditText editTextMessage;
-    private Button buttonSend;
-    private Button buttonGuest;
-    private Button buttonTravel;
-    private ImageView imageLeader;
-    private LinearLayout linearLayoutUsers;
-    private LinearLayout linearLayoutMessage;
-    private ScrollView scrollView;
-    private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
     private DatabaseReference ref;
-    private FirebaseUser user;
+    private FirebaseAuth firebaseAuth;
     private StorageReference storageReference;
-    private Fragment fragment = null;
+    private FirebaseUser user;
+
+    private TextView textViewLeader, textViewTravelTime, textViewFare;
+    private Button button_change, buttonSend;
+    private EditText editTextMessage;
+
+    private LinearLayout linearLayoutUsers, linearLayoutMessage;
+    private ScrollView scrollView;
+    private ImageView imageLeader;
+
     private int z = 0;
 
-    public InsideRoomActivity(String id, String pic){
-        ((NavBarActivity)this.getActivity()).Id = id;
-        ((NavBarActivity)this.getActivity()).Pic = pic;
+    public InsideRoomActivity(String id, String status){
+        ((NavBarActivity)this.getActivity()).roomId = id;
+        ((NavBarActivity)this.getActivity()).roomStatus = status;
     }
 
     @Override
@@ -89,88 +86,44 @@ public class InsideRoomActivity extends Fragment{
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_inside_room, container, false);
 
-        InputMethodManager imm = (InputMethodManager)sContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(rootView.getWindowToken(), 0);
+        firebaseAuth = FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
+        databaseReference = FirebaseDatabase.getInstance().getReference("travel").child(((NavBarActivity)this.getActivity()).roomId);
+        ref = FirebaseDatabase.getInstance().getReference("users");
+        storageReference = FirebaseStorage.getInstance().getReference("profile/");
 
         textViewLeader = (TextView) rootView.findViewById(R.id.textViewLeader);
         textViewTravelTime = (TextView) rootView.findViewById(R.id.textViewTravelTime);
         textViewFare = (TextView) rootView.findViewById(R.id.textViewFare);
-        editTextMessage = (EditText) rootView.findViewById(R.id.editTextMessage);
+        button_change = (Button) rootView.findViewById(R.id.button_change);
         buttonSend = (Button) rootView.findViewById(R.id.buttonSend);
-        buttonGuest = (Button) rootView.findViewById(R.id.buttonGuest);
-        buttonTravel = (Button) rootView.findViewById(R.id.buttonTravel);
-        imageLeader = (ImageView) rootView.findViewById(R.id.imageLeader);
+        editTextMessage = (EditText) rootView.findViewById(R.id.editTextMessage);
+
         linearLayoutUsers = (LinearLayout) rootView.findViewById(R.id.linearLayoutUsers);
         linearLayoutMessage = (LinearLayout) rootView.findViewById(R.id.message);
         scrollView = (ScrollView) rootView.findViewById(R.id.scrollView) ;
+        imageLeader = (ImageView) rootView.findViewById(R.id.imageLeader);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference("travel").child(((NavBarActivity)this.getActivity()).Id);
-        ref = FirebaseDatabase.getInstance().getReference("users");
-        storageReference = FirebaseStorage.getInstance().getReference("profile/");
+        if(roomStatus != null){
+            if(roomStatus.equals("Time")){
+                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.child("users").child("Leader").getValue().toString().equals(user.getUid().toString())){
+                            button_change.setText("Start Travel");
+                        }
+                    }
 
-        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-        if(Pic != null){
-            if (Pic.equals("ok")){
-                buttonGuest.setVisibility(View.GONE);
-                //databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
-                //    @Override
-                //    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //        Toast.makeText(sContext, dataSnapshot.child("Leader").getValue().toString(), Toast.LENGTH_SHORT).show();
-                //    }
-
-                //    @Override
-                //    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                //    }
-                //});
-            }else if (Pic.equals("start")){
-                Toast.makeText(sContext, Pic, Toast.LENGTH_SHORT).show();
-                //buttonGuest.setVisibility(View.GONE);
+                    }
+                });
             }
         }
 
-        buttonGuest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                guest();
-            }
-        });
-
-        buttonTravel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fragment = new TakePicActivity(NavBarActivity.Id);
-                replaceFragment(fragment);
-            }
-        });
-
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                alarm(Integer.valueOf(dataSnapshot.child("DepartureTime").child("DepartureHour").getValue().toString()), Integer.valueOf(dataSnapshot.child("DepartureTime").child("DepartureMinute").getValue().toString()));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                textViewTravelTime.setText(dataSnapshot.child("EstimatedTravelTime").getValue().toString() + " min(s)");
-                textViewFare.setText("Php. " + dataSnapshot.child("MinimumFare").getValue().toString()+"-"+dataSnapshot.child("MaximumFare").getValue().toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        button_change.setOnClickListener(this);
+        buttonSend.setOnClickListener(this);
 
         databaseReference.child("users").addValueEventListener(new ValueEventListener() {
             @SuppressLint("ResourceAsColor")
@@ -192,7 +145,7 @@ public class InsideRoomActivity extends Fragment{
                                 bm = Bitmap.createScaledBitmap(bm, width, height, false);
 
                                 imageLeader.setImageBitmap(bm);
-                                }
+                            }
                         });
                         ref.child(data.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -245,68 +198,68 @@ public class InsideRoomActivity extends Fragment{
                             }
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {}
+                        });
+                    }
+                }
+                databaseReference.child("Guests").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot data : dataSnapshot.getChildren()){
+                            LinearLayout linearLayout;
+                            linearLayout = new LinearLayout(sContext);
+                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            linearLayout.setLayoutParams(layoutParams);
+                            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                            linearLayout.setPadding(0, 0,0, dp(10));
+
+                            ImageView imageView = new ImageView(sContext);
+                            LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(dp(36), LinearLayout.LayoutParams.MATCH_PARENT);
+                            imageView.setLayoutParams(layoutParams1);
+                            imageView.setPadding(dp(10), 0, 0, 0);
+                            imageView.setImageDrawable(sContext.getResources().getDrawable(R.drawable.ic_user_icon));
+
+                            LinearLayout linearLayout1 = new LinearLayout(sContext);
+                            LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                            linearLayout1.setLayoutParams(layoutParams3);
+                            linearLayout1.setPadding(dp(10), 0, 0, 0);
+                            linearLayout1.setOrientation(LinearLayout.VERTICAL);
+
+                            TextView textView = new TextView(sContext);
+                            LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            textView.setLayoutParams(layoutParams2);
+                            textView.setText(data.child("Name").getValue().toString());
+
+                            TextView textView2 = new TextView(sContext);
+                            textView2.setLayoutParams(layoutParams2);
+
+                            ref.child(data.child("CompanionId").getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    textView2.setText("Guest (with: "+dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString()+")");
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
                             });
+
+                            linearLayout1.addView(textView);
+                            linearLayout1.addView(textView2);
+
+                            linearLayout.addView(imageView);
+                            linearLayout.addView(linearLayout1);
+
+                            linearLayoutUsers.addView(linearLayout);
                         }
                     }
-                    databaseReference.child("Guests").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            for (DataSnapshot data : dataSnapshot.getChildren()){
-                                LinearLayout linearLayout;
-                                linearLayout = new LinearLayout(sContext);
-                                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                linearLayout.setLayoutParams(layoutParams);
-                                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-                                linearLayout.setPadding(0, 0,0, dp(10));
 
-                                ImageView imageView = new ImageView(sContext);
-                                LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(dp(36), LinearLayout.LayoutParams.MATCH_PARENT);
-                                imageView.setLayoutParams(layoutParams1);
-                                imageView.setPadding(dp(10), 0, 0, 0);
-                                imageView.setImageDrawable(sContext.getResources().getDrawable(R.drawable.ic_user_icon));
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                LinearLayout linearLayout1 = new LinearLayout(sContext);
-                                LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                                linearLayout1.setLayoutParams(layoutParams3);
-                                linearLayout1.setPadding(dp(10), 0, 0, 0);
-                                linearLayout1.setOrientation(LinearLayout.VERTICAL);
-
-                                TextView textView = new TextView(sContext);
-                                LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                textView.setLayoutParams(layoutParams2);
-                                textView.setText(data.child("Name").getValue().toString());
-
-                                TextView textView2 = new TextView(sContext);
-                                textView2.setLayoutParams(layoutParams2);
-
-                                ref.child(data.child("CompanionId").getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        textView2.setText("Guest (with: "+dataSnapshot.child("Fname").getValue().toString() + " " +dataSnapshot.child("Lname").getValue().toString()+")");
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                    }
-                                });
-
-                                linearLayout1.addView(textView);
-                                linearLayout1.addView(textView2);
-
-                                linearLayout.addView(imageView);
-                                linearLayout.addView(linearLayout1);
-
-                                linearLayoutUsers.addView(linearLayout);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-                }
+                    }
+                });
+            }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
@@ -460,6 +413,7 @@ public class InsideRoomActivity extends Fragment{
             }
         });
 
+        //show messages
         databaseReference.child("messages").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -503,24 +457,49 @@ public class InsideRoomActivity extends Fragment{
             }
         });
 
-        buttonSend.setOnClickListener(new View.OnClickListener() {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                String str = editTextMessage.getText().toString();
-                Message m = new Message(str, user.getUid().toString());
-                String mKey;
-                mKey = UUID.randomUUID().toString();
-                databaseReference.child("messages").child(mKey).setValue(m);
-                editTextMessage.setText("");
-                InputMethodManager imm = (InputMethodManager) sContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                alarm(Integer.valueOf(dataSnapshot.child("DepartureTime").child("DepartureHour").getValue().toString()), Integer.valueOf(dataSnapshot.child("DepartureTime").child("DepartureMinute").getValue().toString()));
+                textViewTravelTime.setText(dataSnapshot.child("EstimatedTravelTime").getValue().toString() + " min(s)");
+                textViewFare.setText("Php. " + dataSnapshot.child("MinimumFare").getValue().toString()+"-"+dataSnapshot.child("MaximumFare").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
 
         return rootView;
     }
 
-    public void alarm(int departureHour, int departureMinute) {
+    //add guest
+    public void guest(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+        alertDialog.setMessage("Enter guest name");
+
+        EditText input = new EditText(sContext);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+        String roomId = ((NavBarActivity)this.getActivity()).roomId;
+
+        alertDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AddMember guest = new AddMember();
+                guest.add(roomId, input.getText().toString());
+            }
+        });
+
+        alertDialog.show();
+    }
+
+    //alarm
+    public void alarm(int departureHour, int departureMinute){
         ((NavBarActivity)this.getActivity()).alarmManager_time = (AlarmManager) sContext.getSystemService(Context.ALARM_SERVICE);
         ((NavBarActivity)this.getActivity()).alarmManager_advance = (AlarmManager) sContext.getSystemService(Context.ALARM_SERVICE);
 
@@ -538,12 +517,12 @@ public class InsideRoomActivity extends Fragment{
         alarm_time.set(Calendar.MINUTE, departureMinute);
         alarm_time.set(Calendar.SECOND, 0);
 
-        if (departureMinute >= 3) {
+        if(departureMinute >= 1){
             alarm_advance.set(Calendar.HOUR_OF_DAY, departureHour);
-            alarm_advance.set(Calendar.MINUTE, departureMinute - 3);
+            alarm_advance.set(Calendar.MINUTE, departureMinute - 1);
             alarm_advance.set(Calendar.SECOND, 0);
-        } else {
-            int i = 3 - departureMinute;
+        }else{
+            int i = 1 - departureMinute;
             alarm_advance.set(Calendar.HOUR_OF_DAY, departureHour - 1);
             alarm_advance.set(Calendar.MINUTE, 60 - i);
             alarm_advance.set(Calendar.SECOND, 0);
@@ -554,18 +533,31 @@ public class InsideRoomActivity extends Fragment{
         }
 
         Intent intent_time = new Intent(sContext, NotificationTime.class);
-        intent_time.putExtra("id", ((NavBarActivity)this.getActivity()).Id);
-        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(sContext, 1, intent_time, 0);
+        intent_time.putExtra("id", ((NavBarActivity)this.getActivity()).roomId);
+        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(sContext, 1, intent_time, PendingIntent.FLAG_CANCEL_CURRENT);
         ((NavBarActivity)this.getActivity()).alarmManager_time.set(AlarmManager.RTC_WAKEUP, alarm_time.getTimeInMillis(), pendingIntent_time);
 
         if (alarm_advance.before(cal_now)) {
             alarm_advance.add(Calendar.DATE, 1);
         }
 
-        //Intent intent_advance = new Intent(sContext, NotificationAdvance.class);
-        //intent_advance.putExtra("id", ((NavBarActivity)this.getActivity()).Id);
-        //PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(sContext, 24444, intent_advance, 0);
-        //((NavBarActivity)this.getActivity()).alarmManager_advance.set(AlarmManager.RTC_WAKEUP, alarm_advance.getTimeInMillis(), pendingIntent_advance);
+        Intent intent_advance = new Intent(sContext, NotificationAdvance.class);
+        intent_advance.putExtra("id", ((NavBarActivity)this.getActivity()).roomId);
+        PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(sContext, 1, intent_advance, PendingIntent.FLAG_CANCEL_CURRENT);
+        ((NavBarActivity)this.getActivity()).alarmManager_advance.set(AlarmManager.RTC_WAKEUP, alarm_advance.getTimeInMillis(), pendingIntent_advance);
+
+    }
+
+    //send message
+    public void sendMessage(View v){
+        String str = editTextMessage.getText().toString();
+        Message m = new Message(str, user.getUid().toString());
+        String mKey;
+        mKey = UUID.randomUUID().toString();
+        databaseReference.child("messages").child(mKey).setValue(m);
+        editTextMessage.setText("");
+        InputMethodManager imm = (InputMethodManager) sContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     public int dp(int number){
@@ -574,36 +566,19 @@ public class InsideRoomActivity extends Fragment{
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-
-    }
-
-    public void guest(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-        alertDialog.setMessage("Enter guest name");
-
-        EditText input = new EditText(sContext);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        input.setLayoutParams(lp);
-        alertDialog.setView(input);
-        String roomId = ((NavBarActivity)this.getActivity()).Id;
-
-        alertDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                AddMember guest = new AddMember();
-                guest.add(roomId, input.getText().toString());
+    public void onClick(View v) {
+        if (v == button_change){
+            if (button_change.getText().toString().equals("Start Travel")){
+                Fragment fragment = new TakePicActivity(NavBarActivity.roomId);
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(R.id.main_frame, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }else{
+                guest();
             }
-        });
-
-        alertDialog.show();
-    }
-    public void replaceFragment(Fragment someFragment) {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.main_frame, someFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        }else if(v == buttonSend){
+            sendMessage(v);
+        }
     }
 }

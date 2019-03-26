@@ -161,8 +161,10 @@ public class PlaceAutocompleteAdapter
                 // Override this method to display a readable result in the AutocompleteTextView
                 // when clicked.
                 if (resultValue instanceof AutocompletePrediction) {
-                    return ((AutocompletePrediction) resultValue).getFullText(null);
+                    Log.d("EYY", "1");
+                    return ((AutocompletePrediction) resultValue).getPrimaryText(null);
                 } else {
+                    Log.d("EYY", "2");
                     return super.convertResultToString(resultValue);
                 }
             }

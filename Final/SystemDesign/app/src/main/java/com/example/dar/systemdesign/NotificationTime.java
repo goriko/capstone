@@ -26,14 +26,13 @@ public class NotificationTime extends BroadcastReceiver {
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         @SuppressLint("InvalidWakeLockTag") PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Tag");
         wakeLock.acquire();
-        wakeLock.release();
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context.getApplicationContext(), "notify_001");
         Intent ii = new Intent(context.getApplicationContext(), NavBarActivity.class);
         ii.putExtra("id", intent.getExtras().get("id").toString());
-        ii.putExtra("pic", "ok");
-        ii.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, ii, 0);
+        ii.putExtra("status", "Time");
+        ii.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, ii, PendingIntent.FLAG_CANCEL_CURRENT);
 
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setSmallIcon(R.mipmap.ic_launcher);
@@ -53,7 +52,7 @@ public class NotificationTime extends BroadcastReceiver {
             mNotificationManager.createNotificationChannel(channel);
         }
 
-        mNotificationManager.notify(0, mBuilder.build());
+        mNotificationManager.notify(1, mBuilder.build());
 
     }
 }

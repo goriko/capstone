@@ -36,7 +36,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static com.example.dar.systemdesign.NavBarActivity.sContext;
+import static com.example.dar.systemdesign.
+        Activity.sContext;
 
 public class RoomActivity extends Fragment implements View.OnClickListener {
 

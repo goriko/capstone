@@ -30,6 +30,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import static com.example.dar.systemdesign.R.color.colorPrimary;
 
 public class NavBarActivity extends AppCompatActivity {
@@ -37,10 +40,9 @@ public class NavBarActivity extends AppCompatActivity {
     private FrameLayout mMainFrame;
     private Fragment fragment;
     public static Context sContext;
-    public static AlarmManager alarmManager_time;
-    public static AlarmManager alarmManager_advance;
-    private Integer j=0, x, i =0;
-    public static String Id = null, userid, Pic;
+    public static String userid, roomId = null, roomStatus = null;
+    public static AlarmManager alarmManager_time, alarmManager_advance;
+    public Integer i = 0, j = 0, x;
     private DatabaseReference databaseReference;
     private FirebaseAuth firebaseAuth;
 
@@ -56,11 +58,9 @@ public class NavBarActivity extends AppCompatActivity {
         final FirebaseUser user = firebaseAuth.getCurrentUser();
         userid = user.getUid();
 
-        if(getIntent().hasExtra("id")){
-            room();
-        }else{
-            load();
-        }
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.main_frame, new ProfileActivity()).commit();
 
         mMainNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -75,11 +75,11 @@ public class NavBarActivity extends AppCompatActivity {
                         return true;
 
                     case R.id.nav_room:
-                        if(Id == null){
+                        if (roomId == null){
                             mMainNav.setItemBackgroundResource(R.color.colorAccent);
                             transaction.replace(R.id.main_frame, new RoomActivity()).addToBackStack(null).commit();
                         }else{
-                            fragment = new InsideRoomActivity(Id, null);
+                            fragment = new InsideRoomActivity(roomId, roomStatus);
                             replaceFragment(fragment);
                         }
                         return true;
@@ -99,15 +99,12 @@ public class NavBarActivity extends AppCompatActivity {
         });
     }
 
-    public void room(){
-        fragment = new InsideRoomActivity(getIntent().getExtras().get("id").toString(), getIntent().getExtras().get("pic").toString());
-        replaceFragment(fragment);
-    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
 
-    public void load(){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.main_frame, new ProfileActivity()).commit();
+        fragment = new InsideRoomActivity(intent.getExtras().get("id").toString(), intent.getExtras().get("status").toString());
+        replaceFragment(fragment);
     }
 
     @Override
@@ -136,72 +133,49 @@ public class NavBarActivity extends AppCompatActivity {
 
             AlertDialog alert11 = builder1.create();
             alert11.show();
+        }else if (getSupportFragmentManager().findFragmentByTag("InsideRoom") != null) {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+            builder1.setMessage("Are you sure you want to exit this room?");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            delete();
+                            roomId = roomStatus = null;
+                            fragment = new RoomActivity();
+                            replaceFragment(fragment);
+                        }
+                    });
+
+            builder1.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
         }else{
-            if(getSupportFragmentManager().findFragmentByTag("InsideRoom") != null){
-                if(Pic.equals("start")){
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-                    builder1.setMessage("Unable to exit room while travelling");
-                    builder1.setCancelable(true);
-
-                    builder1.setNegativeButton(
-                            "Ok",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                }else{
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-                    builder1.setMessage("Are you sure you want to exit this room?");
-                    builder1.setCancelable(true);
-
-                    builder1.setPositiveButton(
-                            "Yes",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    delete();
-                                    Id = null;
-                                    getFragmentManager().popBackStackImmediate();
-                                    getSupportFragmentManager().popBackStack(getSupportFragmentManager().getBackStackEntryCount()-1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                }
-                            });
-
-                    builder1.setNegativeButton(
-                            "No",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                }
-            }else{
-                getFragmentManager().popBackStackImmediate();
-                getSupportFragmentManager().popBackStack(getSupportFragmentManager().getBackStackEntryCount()-1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            }
+            getFragmentManager().popBackStackImmediate();
+            getSupportFragmentManager().popBackStack(getSupportFragmentManager().getBackStackEntryCount()-1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        //fragment = new InsideRoomActivity(intent.getExtras().get("id").toString(), intent.getExtras().get("pic").toString());
-        Log.d("eyyy", intent.getExtras().get("id").toString());
-        //replaceFragment(fragment);
-    }
     public void replaceFragment(Fragment someFragment) {
-        FragmentManager fragmentManager= getSupportFragmentManager();
-        FragmentTransaction transaction= fragmentManager.beginTransaction();;
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.main_frame, someFragment);
         transaction.addToBackStack(null);
         transaction.commitAllowingStateLoss();
     }
+
+    //remove user from room in db
     public void delete(){
-        databaseReference = FirebaseDatabase.getInstance().getReference("travel").child(Id);
+        databaseReference = FirebaseDatabase.getInstance().getReference("travel").child(roomId);
         databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -276,14 +250,15 @@ public class NavBarActivity extends AppCompatActivity {
             }
         });
 
-        Log.d("eyy", "cancel");
-        Intent intent_time = new Intent(getApplicationContext(), NotificationTime.class);
-        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(getApplicationContext(), 1, intent_time, 0);
+        Intent intent_time = new Intent(sContext, NotificationTime.class);
+        PendingIntent pendingIntent_time = PendingIntent.getBroadcast(sContext, 1, intent_time, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager_time.cancel(pendingIntent_time);
 
-        //Intent intent_advance = new Intent(this, NotificationAdvance.class);
-        //PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(this, 24444, intent_advance, 0);
-        //alarmManager_advance.cancel(pendingIntent_advance);
-        j=0;
+        Intent intent_advance = new Intent(sContext, NotificationAdvance.class);
+        PendingIntent pendingIntent_advance = PendingIntent.getBroadcast(sContext, 1, intent_advance, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager_advance.cancel(pendingIntent_advance);
+
+        x=j=i=0;
     }
+
 }
